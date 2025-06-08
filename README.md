@@ -23,7 +23,7 @@ It offers:
 ## Example badge setup
 
 [![# clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/badges/badge_clones.json)](https://github.com/per2jensen/clonepulse/blob/main/doc/weekly_clones.png)
-[![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/badges/milestone_badge.json)](https://github.com/per2jensen/dar-backup/blob/main/doc/weekly_clones.png)
+[![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/badges/milestone_badge.json)](https://github.com/per2jensen/clonepulse/blob/main/doc/weekly_clones.png)
 
 ---
 
