@@ -2,16 +2,16 @@
   "annotations": [
     {
       "date": "2025-06-08",
-      "label": "Daily max: 43"
+      "label": "Daily max: 59"
     }
   ],
-  "total_clones": 43,
-  "unique_clones": 35,
+  "total_clones": 59,
+  "unique_clones": 43,
   "daily": [
     {
       "timestamp": "2025-06-08T00:00:00Z",
-      "count": 43,
-      "uniques": 35
+      "count": 59,
+      "uniques": 43
     }
   ]
 }
