@@ -87,7 +87,7 @@ Repository access: Select the **specific repo**
 
 Permissions:
 
-- Repository traffic: Read-only
+- "Read access to administration and metadata ": Read-only
 - (Add others like contents if your repo is private)
 
 Click "Generate token" and copy it immediately
