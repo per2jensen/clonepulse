@@ -6,6 +6,7 @@ set -euo pipefail
 
 UPLOAD=false
 
+
 # === Helpers ===
 red()   { echo -e "\033[1;31m$*\033[0m"; }
 green() { echo -e "\033[1;32m$*\033[0m"; }
@@ -36,6 +37,7 @@ pip install --upgrade pip
 # === Install dev & packaging tools ===
 pip install -e ".[dev,packaging]"
 
+VERSION=$(hatch version)
 echo "✅ Installed project in editable mode with dev and packaging tools."
 
 # === Clean old builds ===
@@ -57,6 +59,7 @@ twine check dist/* || {
     exit 1
 }
 
+echo Version: ${VERSION}
 
 # === Upload to PyPI if requested ===
 if $UPLOAD; then
