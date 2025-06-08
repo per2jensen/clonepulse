@@ -77,19 +77,18 @@ Click "Generate new token" → "Fine-grained token"
 
 Configure:
 
-    Name: e.g., ClonePulse fetch token
+Name: e.g., ClonePulse fetch token
 
-    Expiration: e.g., 90 days
+Expiration: e.g., 90 days
 
-    Resource owner: Your user or organization
+Resource owner: Your user or organization
 
-    Repository access: Select the specific repo
+Repository access: Select the **specific repo**
 
-    Permissions:
+Permissions:
 
-        Repository traffic: Read-only
-
-        (Add others like contents if your repo is private)
+- Repository traffic: Read-only
+- (Add others like contents if your repo is private)
 
 Click "Generate token" and copy it immediately
 
