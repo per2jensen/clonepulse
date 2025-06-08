@@ -1,0 +1,59 @@
+name: Pytest
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  python3-unit-tests:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup git config
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
+      - name: Install required system packages
+        run: |
+          sudo apt update
+          sudo apt install -y dar dar-static par2 git python3 python3-venv libguestfs-tools
+
+      - name: Make kernel readable for libguestfs
+        run: |
+          version=$(uname -r)
+          sudo dpkg-statoverride --update --add root root 0644 /boot/vmlinuz-${version}
+
+      - name: Copy README into v2 for build
+        run: cp README.md v2/README.md
+
+      - name: Create and prepare Python virtual environment
+        run: |
+          cd $GITHUB_WORKSPACE/v2
+          if [[ -d venv* ]]; then
+            rm -rf venv*
+          fi
+
+          ./build.sh
+
+      - name: Run pytest with coverage
+        run: |
+          cd $GITHUB_WORKSPACE/v2
+          . venv*/bin/activate  # activate the newly created venv (venv or venv-YYYYMMDD-N)
+          coverage erase
+          pytest --rootdir=. --cov=src/dar_backup --cov-report=term --cov-report=xml:coverage.xml tests/
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}  # optional for public repos
+          files: ./v2/coverage.xml

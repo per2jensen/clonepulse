@@ -1,0 +1,78 @@
+[build-system]
+requires = ['hatchling']
+build-backend = "hatchling.build"
+
+
+[tool.hatch.build]
+include = [
+  "src/clonepulse/**",
+  "README.md",
+  "Changelog.md",
+  "LICENSE",
+  "doc/**",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/clonepulse"]
+sources = ["src"]
+
+
+[tool.hatch.version]
+path = "src/clonepulse/__about__.py"
+
+[tool.dar-backup]
+#
+
+[project.scripts]
+#
+
+[project]
+name = "clonepulse"
+dynamic = [
+  "version",
+]
+authors = [
+  { name="Per Jensen", email="clonepulse@pm.me" },
+]
+description = """Your GitHub clone stats, visualized and celebrated."""
+readme = "README.md"
+readme-content-type = "text/markdown"
+license = { file="LICENSE", name="MIT" }
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    'Programming Language :: Python :: 3.9',
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+]
+
+
+dependencies = [
+    "requests>=2.32.2",
+    "pandas>=2.3.0",
+    "matplotlib>=3.10.3",    
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "wheel>=0.45.1",
+  "requests>=2.32.2",
+  "coverage>=7.8.2",
+  "pytest>=8.4.0",
+  "pytest-cov>=6.1.1",
+  "pandas>=2.3.0",
+  "matplotlib>=3.10.3",
+]
+
+packaging = [
+ "build>=1.2.2",
+ "hatchling>=1.27.0",
+ "hatch>=1.14.1",
+ "twine>=6.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/per2jensen/clonepulse"
+Issues =   "https://github.com/per2jensen/clonepulse/issues"
