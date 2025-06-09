@@ -12,3 +12,9 @@
 
 4. **Customize badge URLs:**
    - Replace `<your-user>/<your-repo>` in badge URLs with your repo details
+
+5. **Remove `.github/workflows/py-tests.yml`:**
+   - Unless you hack on this, it can be removed
+
+6. **Remove `example/`:**
+   - This can be removed, used in README.md
