@@ -1,4 +1,4 @@
-# 📈 ClonePulse
+# ClonePulse
 
 **Your GitHub clone stats, visualized and celebrated.**  
 Track weekly trends, highlight milestones, and share visual dashboards—all automatically.
@@ -9,18 +9,18 @@ Track weekly trends, highlight milestones, and share visual dashboards—all aut
 
 ---
 
-## 🚀 What is ClonePulse?
+## What is ClonePulse?
 
 `ClonePulse` is a GitHub-friendly toolchain that fetches, tracks, and visualizes repository clone activity.
 
 It offers:
 
-- ✅ **Daily clone tracking** (total + unique)
-- 📊 **12-week visual dashboard** (.PNG image)
-- 📌 **Automatic milestone detection** (e.g., 500, 1K, 2K+ clones)
-- 🏷️ **Auto-annotations** for clone spikes
-- 🏁 **Badge generation** for README inclusion
-- 🤖 **GitHub Actions** support for automation
+- **Daily clone tracking** (total + unique)
+- **12-week visual dashboard** (.PNG image)
+- **Automatic milestone detection** (e.g., 500, 1K, 2K+ clones)
+- **Auto-annotations** for clone spikes
+- **Badge generation** for README inclusion
+- **GitHub Actions** support for automation
 
 ---
 
@@ -39,7 +39,7 @@ It offers:
 [![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<your-username>/<your-repo>/main/badges/milestone_badge.json)](https://github.com/<your-username>/<your-repo>/blob/main/doc/weekly_clones.png)
 ```
 
-✅ Instructions:
+### Instructions:
 
 Replace \<your-username\> and \<your-repo\> with your actual GitHub handle and repository name.
 
@@ -73,7 +73,7 @@ For private repositories, you will also need:
 - Repository metadata: Read-only
 - Repository traffic: Read-only
 
-### 🛠️ How to Create a Fine-Grained Token
+### How to Create a Fine-Grained Token
 
 Visit: https://github.com/settings/tokens
 
@@ -106,7 +106,7 @@ Click "Generate token" and copy it immediately
 
 3. Paste the token you copied and save.
 
-### 🚀 GitHub Action workflow `fetch_clones.yml`
+### GitHub Action workflow `fetch_clones.yml`
 
 The workflow references the secret as an environment variable:
 
@@ -119,7 +119,7 @@ The workflow references the secret as an environment variable:
 
 The workflows must be enabled and perhaps the crontab needs adjusting to your taste.
 
-## 🛠️ Installation (dev setup)
+## Installation (dev setup)
 
 ```bash
 # python3 and a few packages are needed.
@@ -132,7 +132,7 @@ cd clonepulse
 ./build.sh  # Creates virtualenv and installs dependencies
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Found a bug or have a suggestion?  
 Feel free to [open an issue](https://github.com/per2jensen/clonepulse/issues) or submit a pull request!
