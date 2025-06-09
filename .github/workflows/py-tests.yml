@@ -26,34 +26,18 @@ jobs:
       - name: Install required system packages
         run: |
           sudo apt update
-          sudo apt install -y dar dar-static par2 git python3 python3-venv libguestfs-tools
-
-      - name: Make kernel readable for libguestfs
-        run: |
-          version=$(uname -r)
-          sudo dpkg-statoverride --update --add root root 0644 /boot/vmlinuz-${version}
-
-      - name: Copy README into v2 for build
-        run: cp README.md v2/README.md
+          sudo apt install -y git python3 python3-venv python3-pip
 
       - name: Create and prepare Python virtual environment
         run: |
-          cd $GITHUB_WORKSPACE/v2
           if [[ -d venv* ]]; then
             rm -rf venv*
           fi
-
           ./build.sh
 
-      - name: Run pytest with coverage
+      - name: Run pytest
         run: |
-          cd $GITHUB_WORKSPACE/v2
           . venv*/bin/activate  # activate the newly created venv (venv or venv-YYYYMMDD-N)
           coverage erase
-          pytest --rootdir=. --cov=src/dar_backup --cov-report=term --cov-report=xml:coverage.xml tests/
+          pytest tests/
 
-      - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}  # optional for public repos
-          files: ./v2/coverage.xml
