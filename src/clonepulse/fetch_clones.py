@@ -104,6 +104,12 @@ def main():
         exit(0)
 
 
+    # --- Show raw API data debug info to stay in the CI log ---
+    print("Raw clone data from GitHub API:")
+    for day in data.get("clones", []):
+        print(json.dumps(day, indent=2))
+
+
     # Load existing clone data if available
     if os.path.exists(CLONES_FILE):
         with open(CLONES_FILE, "r") as f:
