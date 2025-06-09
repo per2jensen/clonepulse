@@ -5,6 +5,8 @@ Track weekly trends, highlight milestones, and share visual dashboards—all aut
 
 [![Use this template](https://img.shields.io/badge/-Use%20this%20template-2ea44f?style=for-the-badge&logo=github)](https://github.com/per2jensen/clonepulse/generate)
 
+![CI](https://github.com/per2jensen/clonepulse/actions/workflows/py-tests.yml/badge.svg)
+
 ---
 
 ## 🚀 What is ClonePulse?
