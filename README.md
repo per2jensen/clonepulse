@@ -135,4 +135,4 @@ cd clonepulse
 ## 🤝 Contributing
 
 Found a bug or have a suggestion?  
-Feel free to [open an issue](https://github.com/your-user/clonepulse/issues) or submit a pull request!
+Feel free to [open an issue](https://github.com/per2jensen/clonepulse/issues) or submit a pull request!
