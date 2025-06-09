@@ -120,6 +120,11 @@ The workflows must be enabled and perhaps the crontab needs adjusting to your ta
 ## 🛠️ Installation (dev setup)
 
 ```bash
+# python3 and a few packages are needed.
+# This works on Ubuntu 24.04
+sudo apt update
+sudo apt install -y git python3 python3-venv python3-pip
+
 git clone https://github.com/your-user/clonepulse.git
 cd clonepulse
 ./build.sh  # Creates virtualenv and installs dependencies
