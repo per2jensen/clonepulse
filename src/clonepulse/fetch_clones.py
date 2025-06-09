@@ -153,24 +153,27 @@ def main():
     clones_data["total_clones"] = sum(entry["count"] for entry in clones_data["daily"])
     clones_data["unique_clones"] = sum(entry["uniques"] for entry in clones_data["daily"])
 
-
     # --- Auto-annotate the true max clone day ---
-    # Step 1: Determine true max across all days
-    max_entry = max(clones_data["daily"], key=lambda d: d["count"])
-    max_date = max_entry["timestamp"][:10]
-    max_count = max_entry["count"]
+    if clones_data["daily"]:
+        # Step 1: Determine true max across all days
+        max_entry = max(clones_data["daily"], key=lambda d: d["count"])
+        max_date = max_entry["timestamp"][:10]
+        max_count = max_entry["count"]
 
-    # Step 2: Remove all previous "max" annotations
-    annotations = clones_data.setdefault("annotations", [])
-    before = len(annotations)
-    annotations[:] = [a for a in annotations if "max" not in a["label"].lower()]
+        # Step 2: Remove all previous "max" annotations
+        annotations = clones_data.setdefault("annotations", [])
+        before = len(annotations)
+        annotations[:] = [a for a in annotations if "max" not in a["label"].lower()]
 
-    # Step 3: Add one correct max annotation
-    annotations.append({
-        "date": max_date,
-        "label": f"Daily max: {max_count}"
-    })
-    print(f"📌 Set max annotation for {max_date}: {max_count} clones (replaced {before - len(annotations) + 1} old)")
+        # Step 3: Add one correct max annotation
+        annotations.append({
+            "date": max_date,
+            "label": f"Daily max: {max_count}"
+        })
+        print(f"📌 Set max annotation for {max_date}: {max_count} clones (replaced {before - len(annotations) + 1} old)")
+    else:
+        print("ℹ️ No valid clone entries — skipping max annotation.")
+
 
 
     # Reorder keys to keep annotations at the top

@@ -62,7 +62,6 @@ Validation Requirements:
 
 `total_clones` and `unique_clones` (Optional):
   Present for summary display (e.g., badges), but not used in the chart.
-
 """
 
 import os
@@ -76,171 +75,181 @@ from clonepulse.util import show_scriptname
 CLONES_FILE = "badges/fetch_clones.json"
 OUTPUT_PNG =  "doc/weekly_clones.png"
 
+def main():
 
-print(f"{show_scriptname()} {about.__version__} running")
+
+    print(f"{show_scriptname()} {about.__version__} running")
 
 
-# --- Load and validate JSON ---
-try:
-    with open(CLONES_FILE, "r") as f:
-        clones_data = json.load(f)
-except Exception as e:
-    raise RuntimeError(f"Failed to load or parse JSON file: {e}")
-
-# --- Schema validation ---
-# Validate and sanitize 'daily' data
-raw_rows = clones_data["daily"]
-validated_rows = []
-now = pd.Timestamp.utcnow()
-
-for i, row in enumerate(raw_rows):
+    # --- Load and validate JSON ---
     try:
-        ts = pd.to_datetime(row["timestamp"], utc=True)
-    except Exception:
-        raise ValueError(f"Row {i} has invalid timestamp: {row.get('timestamp')}")
+        with open(CLONES_FILE, "r") as f:
+            clones_data = json.load(f)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load or parse JSON file: {e}")
 
-    if ts > now:
-        raise ValueError(f"Row {i} timestamp is in the future: {ts}")
+    # --- Schema validation ---
+    # Validate and sanitize 'daily' data
+    raw_rows = clones_data["daily"]
+    validated_rows = []
+    now = pd.Timestamp.utcnow()
 
-    count = row.get("count")
-    uniques = row.get("uniques")
-
-    if not isinstance(count, int) or count < 0:
-        raise ValueError(f"Row {i} has invalid count: {count}")
-    if not isinstance(uniques, int) or uniques < 0:
-        raise ValueError(f"Row {i} has invalid uniques: {uniques}")
-
-    validated_rows.append({"timestamp": ts, "count": count, "uniques": uniques})
-
-# Safe to build DataFrame
-df = pd.DataFrame(validated_rows)
-
-
-# --- Create DataFrame ---
-df = pd.DataFrame(clones_data["daily"])
-df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
-df.dropna(subset=['timestamp'], inplace=True)
-
-# Optional: Drop future-dated entries (clock skew, etc.)
-now = pd.Timestamp.utcnow().normalize()
-df = df[df['timestamp'] <= now]
-
-# Group by ISO week starting Mondays
-df['week_start'] = df['timestamp'] - pd.to_timedelta(df['timestamp'].dt.weekday, unit='D')
-df['week_start'] = df['week_start'].dt.normalize()
-
-if df.empty:
-    print("No valid clone data available.")
-    exit(0)
-
-# --- Aggregate weekly ---
-weekly_data = df.groupby('week_start')[['count', 'uniques']].sum().reset_index()
-
-# Remove the current (possibly incomplete) week
-latest_day = df['timestamp'].max().normalize()
-last_complete_week = latest_day - pd.to_timedelta(latest_day.weekday(), unit='D')
-weekly_data = weekly_data[weekly_data['week_start'] < last_complete_week]
-
-# Compute rolling averages
-weekly_data['count_avg'] = weekly_data['count'].rolling(window=3, min_periods=1).mean()
-weekly_data['uniques_avg'] = weekly_data['uniques'].rolling(window=3, min_periods=1).mean()
-
-# Shift week_start to the *reporting date* (following Monday)
-weekly_data['report_date'] = weekly_data['week_start'] + pd.Timedelta(days=7)
-weekly_data = weekly_data.sort_values('report_date').tail(12)
-
-# --- Validate and parse annotations ---
-annotations = clones_data.get("annotations", [])
-valid_annotations = []
-now = pd.Timestamp.utcnow().normalize()
-
-if not isinstance(annotations, list):
-    print("⚠️  'annotations' field is not a list — skipping all annotations.")
-else:
-    for i, ann in enumerate(annotations):
-        if not isinstance(ann, dict):
-            print(f"⚠️  Annotation {i} is not a dict — skipping.")
-            continue
-        if not {"date", "label"}.issubset(ann):
-            print(f"⚠️  Annotation {i} missing 'date' or 'label' — skipping.")
-            continue
+    for i, row in enumerate(raw_rows):
         try:
-            ann_date = pd.to_datetime(ann["date"], utc=True)
-            if ann_date > now:
-                print(f"⚠️  Annotation {i} has future date ({ann['date']}) — skipping.")
-                continue
+            ts = pd.to_datetime(row["timestamp"], utc=True)
         except Exception:
-            print(f"⚠️  Annotation {i} has invalid date format — skipping.")
-            continue
-        if not isinstance(ann["label"], str):
-            print(f"⚠️  Annotation {i} label is not a string — skipping.")
-            continue
+            raise ValueError(f"Row {i} has invalid timestamp: {row.get('timestamp')}")
 
-        valid_annotations.append({
-            "date": ann_date,
-            "label": ann["label"]
-        })
+        if ts > now:
+            raise ValueError(f"Row {i} timestamp is in the future: {ts}")
 
-annotation_df = pd.DataFrame(valid_annotations).sort_values("date")
+        count = row.get("count")
+        uniques = row.get("uniques")
 
-# --- Plotting ---
-fig, ax = plt.subplots(figsize=(10, 5))
+        if not isinstance(count, int) or count < 0:
+            raise ValueError(f"Row {i} has invalid count: {count}")
+        if not isinstance(uniques, int) or uniques < 0:
+            raise ValueError(f"Row {i} has invalid uniques: {uniques}")
 
-ax.plot(weekly_data['report_date'], weekly_data['count'], label='Total Clones', marker='o')
-ax.plot(weekly_data['report_date'], weekly_data['count_avg'], label='Total Clones (3w Avg)', linestyle='--')
+        validated_rows.append({"timestamp": ts, "count": count, "uniques": uniques})
 
-ax.plot(weekly_data['report_date'], weekly_data['uniques'], label='Unique Clones', marker='s')
-ax.plot(weekly_data['report_date'], weekly_data['uniques_avg'], label='Unique Clones (3w Avg)', linestyle=':')
-
-# --- Calculate max safe label length ---
-fig_height_px = fig.get_size_inches()[1] * fig.dpi
-max_vertical_pixels = fig_height_px / 3
-pixels_per_char = 8  # estimate
-max_chars = int(max_vertical_pixels // pixels_per_char)
-print(f"Max annotation label characters allowed: {max_chars}")
-
-# --- Calculate vertical placement inside plot box ---
-ymin, ymax = ax.get_ylim()
-label_y = ymin + 0.97 * (ymax - ymin)
-
-for _, row in annotation_df.iterrows():
-    ann_date = row['date']
-    label = row['label']
-
-    if len(label) > max_chars:
-        label = label[:max_chars - 3] + "..."
-
-    ax.axvline(x=ann_date, color='gray', linestyle=':', linewidth=1)
-    ax.annotate(
-        label,
-        xy=(ann_date, label_y),     # anchor point
-        xytext=(0, -5),             # move slightly downward
-        textcoords='offset points',
-        rotation=90,
-        fontsize=10,
-        ha='center',
-        va='top',                   # anchor top, so text flows down
-        color='dimgray',
-        clip_on=True
-    )
+    # Safe to build DataFrame
+    df = pd.DataFrame(validated_rows)
 
 
-# --- Final plot polish ---
-ax.set_title("Weekly Clone Metrics (Reported on Following Monday)")
-ax.set_xlabel("Reporting Date (Monday after week ends)")
-ax.set_ylabel("Clones")
-ax.grid(True)
-ax.set_xticks(weekly_data['report_date'])
-ax.set_xticklabels([d.strftime('%Y-%m-%d') for d in weekly_data['report_date']], rotation=45)
-ax.legend(loc="lower left", fontsize=9)
-plt.tight_layout()
+    # --- Create DataFrame ---
+    df = pd.DataFrame(clones_data["daily"])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+    df.dropna(subset=['timestamp'], inplace=True)
+
+    # Optional: Drop future-dated entries (clock skew, etc.)
+    now = pd.Timestamp.utcnow().normalize()
+    df = df[df['timestamp'] <= now]
+
+    # Group by ISO week starting Mondays
+    df['week_start'] = df['timestamp'] - pd.to_timedelta(df['timestamp'].dt.weekday, unit='D')
+    df['week_start'] = df['week_start'].dt.normalize()
+
+    if df.empty:
+        print("No valid clone data available.")
+        exit(0)
+
+    # --- Aggregate weekly ---
+    weekly_data = df.groupby('week_start')[['count', 'uniques']].sum().reset_index()
+
+    # Remove the current (possibly incomplete) week
+    latest_day = df['timestamp'].max().normalize()
+    last_complete_week = latest_day - pd.to_timedelta(latest_day.weekday(), unit='D')
+    weekly_data = weekly_data[weekly_data['week_start'] < last_complete_week]
+
+    # Compute rolling averages
+    weekly_data['count_avg'] = weekly_data['count'].rolling(window=3, min_periods=1).mean()
+    weekly_data['uniques_avg'] = weekly_data['uniques'].rolling(window=3, min_periods=1).mean()
+
+    # Shift week_start to the *reporting date* (following Monday)
+    weekly_data['report_date'] = weekly_data['week_start'] + pd.Timedelta(days=7)
+    weekly_data = weekly_data.sort_values('report_date').tail(12)
+
+    # --- Validate and parse annotations ---
+    annotations = clones_data.get("annotations", [])
+    valid_annotations = []
+    now = pd.Timestamp.utcnow().normalize()
+
+    if not isinstance(annotations, list):
+        print("⚠️  'annotations' field is not a list — skipping all annotations.")
+    else:
+        for i, ann in enumerate(annotations):
+            if not isinstance(ann, dict):
+                print(f"⚠️  Annotation {i} is not a dict — skipping.")
+                continue
+            if not {"date", "label"}.issubset(ann):
+                print(f"⚠️  Annotation {i} missing 'date' or 'label' — skipping.")
+                continue
+            try:
+                ann_date = pd.to_datetime(ann["date"], utc=True)
+                if ann_date > now:
+                    print(f"⚠️  Annotation {i} has future date ({ann['date']}) — skipping.")
+                    continue
+            except Exception:
+                print(f"⚠️  Annotation {i} has invalid date format — skipping.")
+                continue
+            if not isinstance(ann["label"], str):
+                print(f"⚠️  Annotation {i} label is not a string — skipping.")
+                continue
+
+            valid_annotations.append({
+                "date": ann_date,
+                "label": ann["label"]
+            })
+
+    annotation_df = pd.DataFrame(valid_annotations).sort_values("date")
+
+    # --- Plotting ---
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    ax.plot(weekly_data['report_date'], weekly_data['count'], label='Total Clones', marker='o')
+    ax.plot(weekly_data['report_date'], weekly_data['count_avg'], label='Total Clones (3w Avg)', linestyle='--')
+
+    ax.plot(weekly_data['report_date'], weekly_data['uniques'], label='Unique Clones', marker='s')
+    ax.plot(weekly_data['report_date'], weekly_data['uniques_avg'], label='Unique Clones (3w Avg)', linestyle=':')
+
+    # --- Calculate max safe label length ---
+    fig_height_px = fig.get_size_inches()[1] * fig.dpi
+    max_vertical_pixels = fig_height_px / 3
+    pixels_per_char = 8  # estimate
+    max_chars = int(max_vertical_pixels // pixels_per_char)
+    print(f"Max annotation label characters allowed: {max_chars}")
+
+    # --- Calculate vertical placement inside plot box ---
+    ymin, ymax = ax.get_ylim()
+    label_y = ymin + 0.97 * (ymax - ymin)
+
+    for _, row in annotation_df.iterrows():
+        ann_date = row['date']
+        label = row['label']
+
+        if len(label) > max_chars:
+            label = label[:max_chars - 3] + "..."
+
+        ax.axvline(x=ann_date, color='gray', linestyle=':', linewidth=1)
+        ax.annotate(
+            label,
+            xy=(ann_date, label_y),     # anchor point
+            xytext=(0, -5),             # move slightly downward
+            textcoords='offset points',
+            rotation=90,
+            fontsize=10,
+            ha='center',
+            va='top',                   # anchor top, so text flows down
+            color='dimgray',
+            clip_on=True
+        )
 
 
-# Ensure output directory exists
-os.makedirs(os.path.dirname(OUTPUT_PNG), exist_ok=True)
-plt.savefig(OUTPUT_PNG)
+    # --- Final plot polish ---
+    ax.set_title("Weekly Clone Metrics (Reported on Following Monday)")
+    ax.set_xlabel("Reporting Date (Monday after week ends)")
+    ax.set_ylabel("Clones")
+    ax.grid(True)
 
-# --- CI-friendly log output ---
-print(f"✅ Dashboard rendered with {len(weekly_data)} weeks.")
-print(f"📊 Latest week shown: {weekly_data['week_start'].max().date()}")
-print(f"🖼️  Output saved to: {OUTPUT_PNG}")
+    tick_dates = pd.to_datetime(weekly_data['report_date'], errors='coerce')
+    tick_labels = tick_dates.dt.strftime('%Y-%m-%d').fillna('Invalid')
+    ax.set_xticks(tick_dates.to_list())  # ensure it's a Python list of datetime64
+    ax.set_xticklabels(tick_labels.to_list(), rotation=45)
+
+    ax.legend(loc="lower left", fontsize=9)
+    plt.tight_layout()
+
+
+    # Ensure output directory exists
+    os.makedirs(os.path.dirname(OUTPUT_PNG), exist_ok=True)
+    plt.savefig(OUTPUT_PNG)
+
+    # --- CI-friendly log output ---
+    print(f"✅ Dashboard rendered with {len(weekly_data)} weeks.")
+    print(f"📊 Latest week shown: {weekly_data['week_start'].max().date()}")
+    print(f"🖼️  Output saved to: {OUTPUT_PNG}")
+
+
+if __name__ == "__main__":
+    main()

@@ -53,7 +53,7 @@ The badges will auto-update based on your repo's clone activity, and clicking th
 
 It is intended to run every Monday morning. Data from the current week is discarded - only data for full weeks are shown.
 
-![Clone Dashboard Example](doc/weekly_clones.png)
+![Clone Dashboard Example](example/weekly_clones.png)
 
 ---
 
