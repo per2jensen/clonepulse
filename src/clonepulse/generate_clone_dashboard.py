@@ -68,6 +68,7 @@ import os
 import json
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 from datetime import datetime
 from clonepulse import __about__ as about
 from clonepulse.util import show_scriptname
@@ -231,6 +232,8 @@ def main():
     ax.set_xlabel("Reporting Date (Monday after week ends)")
     ax.set_ylabel("Clones")
     ax.grid(True)
+
+    ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
     tick_dates = pd.to_datetime(weekly_data['report_date'], errors='coerce')
     tick_labels = tick_dates.dt.strftime('%Y-%m-%d').fillna('Invalid')
