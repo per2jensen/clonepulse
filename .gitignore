@@ -1,6 +1,7 @@
 *.pyc
-venv
-dist
-build
 .coverage
+build/
 coverage.xml
+dist/
+tests/example_referrers/
+venv/
