@@ -73,5 +73,5 @@ if $UPLOAD; then
 else
     green "Dry run: Skipping upload to PyPI"
     echo  "To upload, run:"
-    echo  "  ./release.sh --upload-to-pypi"
+    echo  "  ./build.sh --upload-to-pypi"
 fi
