@@ -58,7 +58,7 @@ jobs:
           if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
             echo "Changes detected, committing..."
             git add $(find badges -type f \( -name '*.json' -o -name '*.txt' \)) || true
-            git commit -m "Update clone data on $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+            git commit -m "CI update: 'fetched clones' data on $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
             # Push changes — if it fails, likely due to race; next run will retry
             git push || echo "⚠️ Push failed (likely a fast-forward conflict). Will retry next time."
           else

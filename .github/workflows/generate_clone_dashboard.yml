@@ -47,7 +47,7 @@ jobs:
           git add -A "doc/weekly_clones.png"
           if ! git diff --cached --quiet; then
             echo "📦 Changes detected, committing dashboard..."
-            git commit -m "Update weekly clones dashboard"
+            git commit -m "CI update:  'weekly clones dashboard'"
             git push
           else
             echo "🟢 No changes in dashboard — nothing to commit."
