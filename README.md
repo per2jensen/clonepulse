@@ -61,11 +61,11 @@ It is intended to run every Monday morning. Data from the current week is discar
 
 ## 🔐 Creating a Secure GitHub Token for ClonePulse
 
-ClonePulse fetches traffic (clone) stats from the GitHub API. This requires a Personal Access Token (PAT) with read-only access to repository traffic. Here's how to create one securely and use it with GitHub Actions.
+ClonePulse fetches traffic (clone) stats from the GitHub API. This requires a Personal Access Token (PAT) with read-only access to `Read access to administration and metadata`. Here's how to create one securely and use it with GitHub Actions.
 
 ### Token Requirements
 
-For public repositories, a fine-grained token with Repository traffic (read-only) access is sufficient.
+For public repositories, a fine-grained token with `Read access to administration and metadata` access is sufficient.
 
 For private repositories, you will also need:
 
@@ -81,7 +81,7 @@ Click "Generate new token" → "Fine-grained token"
 
 Configure:
 
-Name: e.g., ClonePulse fetch token
+Name: e.g., `\<your reposity\>_ClonePulse`
 
 Expiration: e.g., 90 days
 
@@ -89,14 +89,17 @@ Resource owner: Your user or organization
 
 Repository access: Select the **specific repo**
 
-Permissions:
+Permissions put on the token:
 
-- "Read access to administration and metadata ": Read-only
-- (Add others like contents if your repo is private)
+- "Administration": Read-only
+- "Metadata":  Read-only
+- For Private repos you might need more.....
 
-Click "Generate token" and copy it immediately
+Click "Generate token" and copy the value of the token to secure storage immediately. You onby see it once.
 
 ### 🔒 Overview of securing the Token Using GitHub Secrets
+
+After having created the secret, you must now put it into the repository where you want to use it.
 
 1. Go to your GitHub repository:  
    **Settings → Secrets and variables → Actions → New repository secret**

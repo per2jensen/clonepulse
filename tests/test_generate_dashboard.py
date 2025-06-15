@@ -69,3 +69,19 @@ def test_rejects_future_timestamp(temp_env):
     write_json_with_future_date(dash.CLONES_FILE)
     with pytest.raises(ValueError, match="timestamp is in the future"):
         dash.main()
+
+def test_insufficient_data_logged_and_skipped(temp_env, capsys):
+    import clonepulse.generate_clone_dashboard as dash
+    with open(dash.CLONES_FILE, "w") as f:
+        json.dump({
+            "daily": [
+                {"timestamp": "2025-06-12T00:00:00Z", "count": 5, "uniques": 3},
+                {"timestamp": "2025-06-13T00:00:00Z", "count": 6, "uniques": 3},
+                {"timestamp": "2025-06-14T00:00:00Z", "count": 7, "uniques": 4},
+                {"timestamp": "2025-06-15T00:00:00Z", "count": 8, "uniques": 5}
+            ]
+        }, f)
+
+    dash.main()
+    captured = capsys.readouterr()
+    assert "Not enough daily data" in captured.out
