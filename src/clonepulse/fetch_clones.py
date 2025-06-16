@@ -25,9 +25,9 @@ from clonepulse.util import show_scriptname, show_version
 import clonepulse.__about__ as about
 
 # Constants
-CLONES_FILE = "badges/fetch_clones.json"
+CLONES_FILE = "clonepulse/fetch_clones.json"
 MILESTONES = [500, 1000, 2000, 5000, 10000, 20000, 50000]
-BADGE_DIR = "badges"
+BADGE_DIR = "clonepulse"
 BADGE_CLONES = "badge_clones.json"
 
 

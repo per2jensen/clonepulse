@@ -73,8 +73,8 @@ from datetime import datetime
 from clonepulse import __about__ as about
 from clonepulse.util import show_scriptname
 
-CLONES_FILE = "badges/fetch_clones.json"
-OUTPUT_PNG =  "doc/weekly_clones.png"
+CLONES_FILE = "clonepulse/fetch_clones.json"
+OUTPUT_PNG =  "clonepulse/weekly_clones.png"
 
 def main():
 
@@ -156,12 +156,6 @@ def main():
     # Include only weeks that ended by yesterday (i.e., their Sunday ≤ yesterday)
     today = pd.Timestamp.utcnow().normalize()
     weekly_data = weekly_data[weekly_data['week_start'] + pd.Timedelta(days=6) < today]
-
-
-    # Remove the current (possibly incomplete) week
-    #latest_day = df['timestamp'].max().normalize()
-    #last_complete_week = latest_day - pd.to_timedelta(latest_day.weekday(), unit='D')
-    #weekly_data = weekly_data[weekly_data['week_start'] < last_complete_week]
 
     # Compute rolling averages
     weekly_data['count_avg'] = weekly_data['count'].rolling(window=3, min_periods=1).mean()

@@ -9,22 +9,15 @@ include = [
   "README.md",
   "Changelog.md",
   "LICENSE",
-  "doc/**",
+  "clonepulse/**",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/clonepulse"]
 sources = ["src"]
 
-
 [tool.hatch.version]
 path = "src/clonepulse/__about__.py"
-
-[tool.dar-backup]
-#
-
-[project.scripts]
-#
 
 [project]
 name = "clonepulse"

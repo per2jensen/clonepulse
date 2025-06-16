@@ -26,8 +26,8 @@ It offers:
 
 ## Example badge setup
 
-[![# clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/badges/badge_clones.json)](https://github.com/per2jensen/clonepulse/blob/main/doc/weekly_clones.png)
-[![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/badges/milestone_badge.json)](https://github.com/per2jensen/clonepulse/blob/main/doc/weekly_clones.png)
+[![# clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/badge_clones.json)](https://github.com/per2jensen/clonepulse/blob/main/clonepulse/weekly_clones.png)
+[![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/milestone_badge.json)](https://github.com/per2jensen/clonepulse/blob/main/clonepulse/weekly_clones.png)
 
 ---
 
@@ -39,7 +39,7 @@ It offers:
 [![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<your-username>/<your-repo>/main/badges/milestone_badge.json)](https://github.com/<your-username>/<your-repo>/blob/main/doc/weekly_clones.png)
 ```
 
-### Instructions:
+### Instructions
 
 Replace \<your-username\> and \<your-repo\> with your actual GitHub handle and repository name.
 
