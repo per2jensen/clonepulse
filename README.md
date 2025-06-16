@@ -135,6 +135,25 @@ cd clonepulse
 ./build.sh  # Creates virtualenv and installs dependencies
 ```
 
+## How to drop the essentials into another repository
+
+Create a tarball with the needed artifacts and extract into your repository of choice.
+
+This assumes you have the destination repository somewhere on disk.
+
+Take a look at SETUP.md also.
+
+```bash
+# create tarball
+tar --exclude='*/__pycache__' \
+    --exclude='*.pyc' \
+    -cvf clonepulse-artifacts.tar \
+    src/clonepulse clonepulse .github/workflows
+
+# extract tarball in destination repo 
+tar -xvf clonepulse-artifacts.tar -C <your repo>
+```
+
 ## Contributing
 
 Found a bug or have a suggestion?  
