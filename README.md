@@ -34,9 +34,9 @@ It offers:
 ## 🏷️ ClonePulse Badge Snippet
 
 ```text
-[![# clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<your-username>/<your-repo>/main/badges/badge_clones.json)](https://github.com/<your-username>/<your-repo>/blob/main/doc/weekly_clones.png)
+[![# clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<your-username>/<your-repo>/main/clonepulse/badge_clones.json)](https://github.com/<your-username>/<your-repo>/blob/main/clonepulse/weekly_clones.png)
 
-[![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<your-username>/<your-repo>/main/badges/milestone_badge.json)](https://github.com/<your-username>/<your-repo>/blob/main/doc/weekly_clones.png)
+[![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<your-username>/<your-repo>/main/clonepulse/milestone_badge.json)](https://github.com/<your-username>/<your-repo>/blob/main/clonepulse/weekly_clones.png)
 ```
 
 ### Instructions
