@@ -5,3 +5,5 @@ coverage.xml
 dist/
 tests/example_referrers/
 venv/
+*.tar
+*tar.gz

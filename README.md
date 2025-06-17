@@ -149,6 +149,7 @@ Take a look at SETUP.md also.
 #  - artifacts in clonepulse/
 #  - the python scripts in src/clonepulse/
 tar --exclude='.github/workflows/py-tests.yml' \
+    --exclude='clonepulse/weekly_clones.png' \
     --exclude='*/__pycache__' --exclude='*.pyc' \
     -cvf clonepulse-artifacts.tar \
     {src/clonepulse,clonepulse,.github/workflows}
