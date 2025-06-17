@@ -85,3 +85,41 @@ def test_insufficient_data_logged_and_skipped(temp_env, capsys):
     dash.main()
     captured = capsys.readouterr()
     assert "Not enough daily data" in captured.out
+
+
+def test_empty_dashboard_when_daily_missing(temp_env):
+    import clonepulse.generate_clone_dashboard as dash
+    # Write JSON with no 'daily' key
+    with open(dash.CLONES_FILE, "w") as f:
+        json.dump({}, f)
+
+    dash.main()
+    assert os.path.exists(dash.OUTPUT_PNG)
+
+
+
+def test_empty_dashboard_when_daily_empty(temp_env):
+    import clonepulse.generate_clone_dashboard as dash
+    with open(dash.CLONES_FILE, "w") as f:
+        json.dump({"daily": []}, f)
+
+    dash.main()
+    assert os.path.exists(dash.OUTPUT_PNG)
+
+
+def test_empty_dashboard_when_not_enough_days(temp_env, capsys):
+    import clonepulse.generate_clone_dashboard as dash
+    with open(dash.CLONES_FILE, "w") as f:
+        json.dump({
+            "daily": [
+                {"timestamp": "2025-06-01T00:00:00Z", "count": 4, "uniques": 2},
+                {"timestamp": "2025-06-02T00:00:00Z", "count": 5, "uniques": 3}
+            ]
+        }, f)
+
+    dash.main()
+    captured = capsys.readouterr()
+    assert os.path.exists(dash.OUTPUT_PNG)
+    assert "Not enough daily data" in captured.out
+
+

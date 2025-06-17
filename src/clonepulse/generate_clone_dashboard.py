@@ -75,6 +75,28 @@ from clonepulse.util import show_scriptname
 
 CLONES_FILE = "clonepulse/fetch_clones.json"
 OUTPUT_PNG =  "clonepulse/weekly_clones.png"
+EMPTY_DASHBOARD_MESSAGE = "Not enough data to generate a dashboard.\nOne week's data needed."
+
+
+def render_empty_dashboard(message: str):
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.axis("off")  # Turn off axes
+
+    # Centered message
+    ax.text(
+        0.5, 0.5, message,
+        ha='center', va='center',
+        fontsize=14, color='gray',
+        wrap=True, transform=ax.transAxes
+    )
+
+    # Ensure output directory exists
+    os.makedirs(os.path.dirname(OUTPUT_PNG), exist_ok=True)
+    plt.savefig(OUTPUT_PNG)
+    print("Empty dashboard generated (not enough data).")
+    print(f"Output saved to: {OUTPUT_PNG}")
+
+
 
 def main():
 
@@ -91,7 +113,13 @@ def main():
 
     # --- Schema validation ---
     # Validate and sanitize 'daily' data
-    raw_rows = clones_data["daily"]
+    raw_rows = clones_data.get("daily", [])
+
+    # Replace existing early return with:
+    if not raw_rows or not isinstance(raw_rows, list):
+        render_empty_dashboard(EMPTY_DASHBOARD_MESSAGE)
+        return
+
     validated_rows = []
     now = pd.Timestamp.utcnow()
 
@@ -118,6 +146,7 @@ def main():
     df = pd.DataFrame(validated_rows)
 
     if df.shape[0] < 7:
+        render_empty_dashboard(EMPTY_DASHBOARD_MESSAGE)
         print(f"⚠️ Not enough daily data to generate a weekly chart (only {df.shape[0]} days). At least 7 days required.")
         return
 

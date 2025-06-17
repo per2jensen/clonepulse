@@ -144,13 +144,16 @@ This assumes you have the destination repository somewhere on disk.
 Take a look at SETUP.md also.
 
 ```bash
-# create tarball
-tar --exclude='*/__pycache__' \
-    --exclude='*.pyc' \
+# create tarball with
+#  - 2 .github workflows
+#  - artifacts in clonepulse/
+#  - the python scripts in src/clonepulse/
+tar --exclude='.github/workflows/py-tests.yml' \
+    --exclude='*/__pycache__' --exclude='*.pyc' \
     -cvf clonepulse-artifacts.tar \
-    src/clonepulse clonepulse .github/workflows
+    {src/clonepulse,clonepulse,.github/workflows}
 
-# extract tarball in destination repo 
+# extract artifacts to destination repo 
 tar -xvf clonepulse-artifacts.tar -C <your repo>
 ```
 
