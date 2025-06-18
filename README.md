@@ -63,7 +63,7 @@ It is intended to run every Monday morning. Data from the current week is discar
 
 ---
 
-## 🔐 Creating a Secure GitHub Token for ClonePulse
+## 🔐 Create GitHub Token for ClonePulse
 
 ClonePulse fetches traffic (clone) stats from the GitHub API. This requires a Personal Access Token (PAT) with read-only access to `Read access to administration and metadata`. Here's how to create one securely and use it with GitHub Actions.
 
@@ -101,7 +101,7 @@ Permissions put on the token:
 
 Click "Generate token" and copy the value of the token to secure storage immediately. You onby see it once.
 
-### 🔒 Overview of securing the Token Using GitHub Secrets
+### Use the token in your repository
 
 After having created the secret, you must now put it into the repository where you want to use it.
 
@@ -115,7 +115,7 @@ After having created the secret, you must now put it into the repository where y
 
 ### GitHub Action workflow `fetch_clones.yml`
 
-The workflow references the secret as an environment variable:
+The workflow references the secret as an environment variable in this way:
 
 ```yaml
 - name: Run fetch_clones.py
