@@ -24,7 +24,7 @@ It offers:
 
 ---
 
-## Example badge setup
+## Live badges
 
 [![# clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/badge_clones.json)](https://github.com/per2jensen/clonepulse/blob/main/clonepulse/weekly_clones.png)
 [![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/milestone_badge.json)](https://github.com/per2jensen/clonepulse/blob/main/clonepulse/weekly_clones.png)
@@ -41,15 +41,19 @@ It offers:
 
 ### Instructions
 
-Replace \<your-username\> and \<your-repo\> with your actual GitHub handle and repository name.
+1. Copy the badge snippets shown in the above paragraph to your README.md and replace \<your-username\> and \<your-repo\> with your actual GitHub username and repository name.
 
-Ensure the `fetch_clones.yml` and `generate_clone_dashboard.yml` GitHub Actions are set up, enabled and working. Run them manually to check.
+2. Create a secret (see below)
+
+3. Add the secret to your repo (see below)
+
+4. Ensure `fetch_clones.yml` and `generate_clone_dashboard.yml` GitHub Actions are set up, enabled and working. Run them manually to check.
 
 The badges will auto-update based on your repo's clone activity, and clicking the badges will show the latest dashboard.
 
 ---
 
-## 📷 Example Dashboard
+## 📷 Example dashboard
 
 > A weekly clone activity chart is automatically updated and saved in `doc/weekly_clones.png`.
 
