@@ -14,7 +14,7 @@ Track weekly trends, highlight milestones, and share visual dashboards—all aut
 These are live examples of the badges.
 
 [![# clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/badge_clones.json)](https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/weekly_clones.png)
-[![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/milestone_badge.json)]([https://raw.githubusercontent.com/per2jensen/clonepulse/main/doc/weekly_clones.png/clonepulse/weekly_clones.png](https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/weekly_clones.png))
+[![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/milestone_badge.json)]([https://raw.githubusercontent.com/per2jensen/clonepulse/main/doc/weekly_clones.png/clonepulse/weekly_clones.png](https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/weekly_clones.png)
 
 The Milestone badge automatically starts celebrating #clones milestones:
 
