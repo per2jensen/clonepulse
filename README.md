@@ -52,18 +52,42 @@ It is intended to run every Monday morning. Data from the current week is discar
 
 ### Setup instructions
 
-1. Create a secret (see below)
+1. Create a token, and add it to your repo (see below)
 
-2. Add the secret to your repo (see below)
+2. [Drop the essentials](#how-to-drop-the-essentials-into-another-repository) into your repo
 
-3. [Drop the essentials](#how-to-drop-the-essentials-into-another-repository) into your repo
-
-4. Copy these badge links to your README.md and replace `your-username/your-repo` with your actual GitHub username and repository name.
+3. Copy these badge links to your README.md and replace `your-username/your-repo` with your actual GitHub username and repository name:
 
 ```text
 [![# clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/your-username/your-repo/main/clonepulse/badge_clones.json)](https://github.com/your-username/your-repo/blob/main/clonepulse/weekly_clones.png)
 
 [![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/your-username/your-repo/main/clonepulse/milestone_badge.json)](https://github.com/your-username/your-repo/blob/main/clonepulse/weekly_clones.png)
+```
+
+4. Modify `.github/workflows/fetch_clones.yml`
+
+Modify the values given to `--user` and `--repo` in the workflow task shown below:
+
+```yaml
+      - name: Run fetch_clones.py
+        env:
+          TOKEN: ${{ secrets.CLONEPULSE_METRICS }}
+        run: |
+          PYTHONPATH=src python src/clonepulse/fetch_clones.py \
+            --user per2jensen \
+            --repo clonepulse
+```
+
+to
+
+```yaml
+      - name: Run fetch_clones.py
+        env:
+          TOKEN: ${{ secrets.CLONEPULSE_METRICS }}
+        run: |
+          PYTHONPATH=src python src/clonepulse/fetch_clones.py \
+            --user <your Github login> \
+            --repo <your repo to fetch clone stats from>
 ```
 
 ---
