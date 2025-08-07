@@ -240,8 +240,8 @@
     },
     {
       "timestamp": "2025-07-24T00:00:00Z",
-      "count": 7,
-      "uniques": 7
+      "count": 5,
+      "uniques": 5
     },
     {
       "timestamp": "2025-07-25T00:00:00Z",
@@ -302,6 +302,11 @@
       "timestamp": "2025-08-05T00:00:00Z",
       "count": 4,
       "uniques": 4
+    },
+    {
+      "timestamp": "2025-08-06T00:00:00Z",
+      "count": 2,
+      "uniques": 2
     }
   ]
 }
