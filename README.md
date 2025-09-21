@@ -20,7 +20,7 @@ The Milestone badge automatically starts celebrating #clones milestones:
 
 - [See the celebration badge in action here](https://github.com/per2jensen/dar-backup)
 - Checkout [the script](https://github.com/per2jensen/clonepulse/blob/main/src/clonepulse/fetch_clones.py) to see milestones and configuration of the badge.
-- You can adjust milestones in fetch_clones.py → MILESTONES list.
+- You can adjust milestones in `fetch_clones.py` → `MILESTONES` list.
 
 ---
 
@@ -33,8 +33,8 @@ It offers:
 - **Daily clone tracking** (total + unique)
 - **12-week visual dashboard** (.PNG image)
 - **Automatic milestone detection** (e.g., 500, 1K, 2K+ clones)
-- **Auto-annotations** for clone spikes
-  - Annotations can be manually added to `clonepulse/fetch_clones.json` (for example date of post on reddit)
+- **Auto-annotations** for clone spikes  
+  Annotations can be manually added to `clonepulse/fetch_clones.json` (for example the date of a post on reddit)
 - **Badge generation** for README inclusion
 - **GitHub Actions** support for automation
 
@@ -42,15 +42,51 @@ It offers:
 
 ## 📷 Example dashboard
 
-> A weekly clone activity chart is automatically updated and saved in `doc/weekly_clones.png`.
+> A weekly clone activity chart is automatically updated and saved in `clonepulse/weekly_clones.png`.
 
-It is intended to run every Monday morning. Data from the current week is discarded - only data for full weeks are shown.
+It is intended to run every Monday morning. Data from the current week is discarded. Only full Monday–Sunday weeks are shown.
 
 ![Clone Dashboard Example](example/weekly_clones.png)
 
 ---
 
-### Setup instructions
+## 🧰 Dashboard generator CLI
+
+`src/clonepulse/generate_clone_dashboard.py` supports reproducible windows and safer input validation.
+
+### Options
+
+- `--start YYYY-MM-DD`  
+  Start **reporting date** (typically a Monday). Window is inclusive.  
+  Only annotations within the plotted window are drawn.  
+  **Validation:** if the date is in the future the script prints  
+  `ERROR: --start date is in the future: <date>` and exits with code `2`.
+
+- `--weeks N`  
+  Number of weeks to display starting at `--start` (default: 12).  
+  **Validation:** if `N` is negative the script prints  
+  `ERROR: --weeks must be non-negative. Got <N>.` and exits with code `2`.
+
+### Behavior
+
+- Weekly aggregation: Monday–Sunday, reported on the following Monday.
+- Current (partial) week excluded.
+- Duplicate-date annotations are **stacked vertically** to avoid overlap.
+- Long labels are truncated on **word boundaries** to a safe length.
+
+### Examples
+
+```bash
+# Default: last 12 weeks
+PYTHONPATH=src python src/clonepulse/generate_clone_dashboard.py
+
+# Reproducible window: 8 weeks from 2025-06-02
+PYTHONPATH=src python src/clonepulse/generate_clone_dashboard.py --start 2025-06-02 --weeks 8
+````
+
+---
+
+## Setup instructions
 
 1. Create a token, and add it to your repo (see below)
 
@@ -90,6 +126,25 @@ to
             --repo <your repo to fetch clone stats from>
 ```
 
+5. Generate the dashboard PNG in your workflow
+
+Default (last 12 weeks):
+
+```yaml
+      - name: Render dashboard (default window)
+        run: |
+          PYTHONPATH=src python src/clonepulse/generate_clone_dashboard.py
+```
+
+Reproducible window:
+
+```yaml
+      - name: Render dashboard (reproducible window)
+        run: |
+          PYTHONPATH=src python src/clonepulse/generate_clone_dashboard.py \
+            --start 2025-06-02 --weeks 8
+```
+
 ---
 
 ## 🔐 Create GitHub Token for ClonePulse
@@ -102,31 +157,28 @@ For public repositories, a fine-grained token with `Read access to administratio
 
 For private repositories, you will also need:
 
-- Repository contents: Read-only
-- Repository metadata: Read-only
-- Repository traffic: Read-only
+* Repository contents: Read-only
+* Repository metadata: Read-only
+* Repository traffic: Read-only
 
 ### How to Create a Fine-Grained Token
 
-Visit: https://github.com/settings/tokens
+Visit: [https://github.com/settings/tokens](https://github.com/settings/tokens)
 
 Click "Generate new token" → "Fine-grained token"
 
 Configure:
 
 Name: e.g., `"your repository"_ClonePulse`
-
 Expiration: e.g., 90 days
-
 Resource owner: Your user or organization
-
 Repository access: Select the **specific repo**
 
 Set the following permissions on the token:
 
-- "Administration": Read-only
-- "Metadata":  Read-only
-- For Private repos you might need more.....
+* "Administration": Read-only
+* "Metadata":  Read-only
+* For Private repos you might need more
 
 Click "Generate token" and copy the value of the token to secure storage immediately. You only see it once.
 
@@ -134,10 +186,10 @@ Click "Generate token" and copy the value of the token to secure storage immedia
 
 After having created the secret, you must now put it into the repository where you want to use it.
 
-1. Go to your GitHub repository:  
+1. Go to your GitHub repository:
    **Settings → Secrets and variables → Actions → New repository secret**
 
-2. Name the secret:  
+2. Name the secret:
    `CLONEPULSE_METRICS`
 
 3. Paste the token you copied and save.
@@ -151,13 +203,15 @@ The workflow references the secret as an environment variable in this way:
   run: python src/clonepulse/fetch_clones.py
 ```
 
+---
+
 ## How to drop the essentials into another repository
 
 Create a tarball with the needed artifacts as shown below and extract the contents into your repository of choice.
 
 Your destination repository must be somewhere on disk in a local git repo.
 
-Take a look at SETUP.md also.
+Take a look at `SETUP.md` also.
 
 ```bash
 # create tarball with
@@ -170,15 +224,16 @@ tar --exclude='.github/workflows/py-tests.yml' \
     -cvf clonepulse-artifacts.tar \
     {src/clonepulse,clonepulse,.github/workflows}
 
-# extract artifacts to destination repo 
-tar -xvf clonepulse-artifacts.tar -C <your repo>
+# extract artifacts to destination repo
+	ar -xvf clonepulse-artifacts.tar -C <your repo>
 ```
 
 After extraction, ensure that:
 
-  clonepulse/ and src/clonepulse/ exist in your repo root
+* `clonepulse/` and `src/clonepulse/` exist in your repo root
+* GitHub Actions are in `.github/workflows/`
 
-  GitHub Actions are in .github/workflows/
+---
 
 ## Installation (dev setup)
 
@@ -195,9 +250,11 @@ cd clonepulse
 ./build.sh  # Creates virtualenv and installs dependencies
 ```
 
-This sets up a Python virtual environment and installs dependencies listed in pyproject.toml.
+This sets up a Python virtual environment and installs dependencies listed in `pyproject.toml`.
+
+---
 
 ## Contributing
 
-Found a bug or have a suggestion?  
-Feel free to [open an issue](https://github.com/per2jensen/clonepulse/issues) or submit a pull request!
+Found a bug or have a suggestion
+Feel free to [open an issue](https://github.com/per2jensen/clonepulse/issues) or submit a pull request
