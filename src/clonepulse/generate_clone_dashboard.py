@@ -42,8 +42,8 @@ JSON Input Format:
 
 Validation Requirements:
 ------------------------
-`daily`: required list of timestamp/count/uniques
-`annotations`: optional list of date/label
+`daily`: required list of timestamp/count/uniques (no future dates)
+`annotations`: optional list of date/label (no future dates)
 """
 
 import os
@@ -53,7 +53,6 @@ import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from datetime import datetime
 from clonepulse import __about__ as about
 from clonepulse.util import show_scriptname
 
@@ -74,7 +73,7 @@ def render_empty_dashboard(message: str):
     )
     os.makedirs(os.path.dirname(OUTPUT_PNG), exist_ok=True)
     plt.savefig(OUTPUT_PNG)
-    print("Empty dashboard generated (not enough data).")
+    print("Empty dashboard generated.")
     print(f"Output saved to: {OUTPUT_PNG}")
 
 
@@ -118,38 +117,50 @@ def main(argv=None):
         argv = []
     print(f"{show_scriptname()} {about.__version__} running")
 
+    # CLI
     parser = argparse.ArgumentParser(description="Render GitHub clones weekly dashboard.")
-    parser.add_argument(
+
+    # Mutually exclusive: --year OR --start
+    mx = parser.add_mutually_exclusive_group()
+    mx.add_argument(
+        "--year",
+        type=str,
+        default=None,
+        help="Calendar year to plot (YYYY). Overrides other windowing.",
+    )
+    mx.add_argument(
         "--start",
         type=str,
         default=None,
         help="Start reporting date (YYYY-MM-DD, typically a Monday). Window is inclusive.",
     )
+
     parser.add_argument(
         "--weeks",
         type=int,
         default=NUM_WEEKS,
-        help=f"Number of weeks to display (default: {NUM_WEEKS}).",
+        help=f"Number of weeks to display when --start is used (default: {NUM_WEEKS}).",
     )
-    parser.add_argument(
-        "--year",
-        type=str,
-        default=None,
-        help="Calendar year to plot (YYYY). Overrides --start and --weeks.",
-    )
+
     args = parser.parse_args(argv)
 
+    # Detect if --weeks was explicitly passed to warn when ignored
+    weeks_explicit = "--weeks" in argv
+
+    # Validate --weeks
     if args.weeks is not None and int(args.weeks) < 0:
         print(f"ERROR: --weeks must be non-negative. Got {args.weeks}.", file=sys.stderr)
         sys.exit(2)
     weeks_to_plot = int(args.weeks)
 
+    # Load JSON
     try:
         with open(CLONES_FILE, "r") as f:
             clones_data = json.load(f)
     except Exception as e:
         raise RuntimeError(f"Failed to load or parse JSON file: {e}")
 
+    # Validate 'daily'
     raw_rows = clones_data.get("daily", [])
     if not raw_rows or not isinstance(raw_rows, list):
         render_empty_dashboard(EMPTY_DASHBOARD_MESSAGE)
@@ -180,10 +191,12 @@ def main(argv=None):
         print(f"⚠️ Not enough daily data to generate a weekly chart ({df.shape[0]} days).")
         return
 
+    # Normalize and drop any future dates defensively
     df["timestamp"] = df["timestamp"].dt.tz_convert(None)
     now_naive = _utcnow_naive()
     df = df[df["timestamp"] <= now_naive]
 
+    # Week start is Monday
     df["week_start"] = df["timestamp"] - pd.to_timedelta(df["timestamp"].dt.weekday, unit="D")
     df["week_start"] = df["week_start"].dt.normalize()
 
@@ -192,6 +205,7 @@ def main(argv=None):
         render_empty_dashboard(EMPTY_DASHBOARD_MESSAGE)
         return
 
+    # Aggregate weekly totals
     weekly_data = df.groupby("week_start")[["count", "uniques"]].sum().reset_index()
 
     if weekly_data.empty:
@@ -199,6 +213,7 @@ def main(argv=None):
         render_empty_dashboard(EMPTY_DASHBOARD_MESSAGE)
         return
 
+    # Exclude current (possibly incomplete) week
     today = _utc_today_naive()
     weekly_data = weekly_data[weekly_data["week_start"] + pd.Timedelta(days=6) < today]
 
@@ -207,13 +222,18 @@ def main(argv=None):
         render_empty_dashboard(EMPTY_DASHBOARD_MESSAGE)
         return
 
+    # Rolling averages and report date (following Monday)
     weekly_data["count_avg"] = weekly_data["count"].rolling(window=3, min_periods=1).mean()
     weekly_data["uniques_avg"] = weekly_data["uniques"].rolling(window=3, min_periods=1).mean()
     weekly_data["report_date"] = weekly_data["week_start"] + pd.Timedelta(days=7)
     weekly_data = weekly_data.sort_values("report_date").reset_index(drop=True)
 
-    # --- Year filter ---
+    # Window selection
     if args.year:
+        # Warn if weeks was explicitly passed; it is ignored with --year
+        if weeks_explicit:
+            print("ℹ️  --weeks is ignored when --year is used.")
+
         year_str = args.year.strip()
         if len(year_str) != 4 or not year_str.isdigit():
             print(f"ERROR: --year must be in YYYY format. Got {args.year!r}.", file=sys.stderr)
@@ -228,6 +248,7 @@ def main(argv=None):
         year_start = pd.Timestamp(year=year, month=1, day=1)
         year_end = pd.Timestamp(year=year, month=12, day=31)
 
+        # Keep weeks whose week_start falls inside the calendar year
         year_data = weekly_data[
             (weekly_data["week_start"] >= year_start) &
             (weekly_data["week_start"] <= year_end)
@@ -241,12 +262,13 @@ def main(argv=None):
         weekly_data = year_data
         plot_start = weekly_data["report_date"].min().normalize()
         plot_end = weekly_data["report_date"].max().normalize()
+
     else:
         if args.start:
             try:
                 plot_start = _to_naive_utc_date(args.start)
             except Exception:
-                raise ValueError(f"Invalid --start date: {args.start!r}")
+                raise ValueError(f"Invalid --start date: {args.start!r} (expected YYYY-MM-DD)")
             if plot_start > _utc_today_naive():
                 print(f"ERROR: --start date is in the future: {args.start}", file=sys.stderr)
                 sys.exit(2)
@@ -257,6 +279,7 @@ def main(argv=None):
                 (weekly_data["report_date"] <= plot_end)
             ]
         else:
+            # Default: last N weeks
             weekly_data = weekly_data.tail(weeks_to_plot)
             if not weekly_data.empty:
                 plot_start = weekly_data["report_date"].min().normalize()
@@ -269,6 +292,7 @@ def main(argv=None):
             render_empty_dashboard("No data in the selected window.")
             return
 
+    # Annotations: validate, bound to window, draw
     annotations = clones_data.get("annotations", [])
     valid_annotations = []
     now_norm = _utc_today_naive()
@@ -299,6 +323,7 @@ def main(argv=None):
 
     annotation_df = pd.DataFrame(valid_annotations).sort_values("date")
 
+    # Keep only annotations within the plotted time window
     if not annotation_df.empty:
         in_window = (annotation_df["date"] >= plot_start) & (annotation_df["date"] <= plot_end)
         dropped = int((~in_window).sum())
@@ -306,6 +331,7 @@ def main(argv=None):
             print(f"ℹ️  Skipping {dropped} annotation(s) outside [{plot_start.date()} .. {plot_end.date()}].")
         annotation_df = annotation_df.loc[in_window].reset_index(drop=True)
 
+    # Plot
     fig, ax = plt.subplots(figsize=(10, 5))
 
     ax.plot(weekly_data["report_date"], weekly_data["count"], label="Total Clones", marker="o")
@@ -313,6 +339,7 @@ def main(argv=None):
     ax.plot(weekly_data["report_date"], weekly_data["uniques"], label="Unique Clones", marker="s")
     ax.plot(weekly_data["report_date"], weekly_data["uniques_avg"], label="Unique Clones (3w Avg)", linestyle=":")
 
+    # Annotation rendering parameters
     fig_height_px = fig.get_size_inches()[1] * fig.dpi
     max_vertical_pixels = fig_height_px / 3
     pixels_per_char = 8
@@ -325,7 +352,7 @@ def main(argv=None):
 
     if not annotation_df.empty:
         for ann_date, group in annotation_df.groupby("date", sort=True):
-            ax.axvline(x=ann_date, color="gray", linestyle=":", linewidth=1)
+            ax.axvline(x=ann_date, linestyle=":", linewidth=1)
             for i, (_, row) in enumerate(group.iterrows()):
                 label = _truncate_on_word_boundary(row["label"], max_chars)
                 ax.annotate(
@@ -345,8 +372,8 @@ def main(argv=None):
     ax.set_xlabel("Reporting Date (Monday after week ends)")
     ax.set_ylabel("Clones")
     ax.grid(True)
-
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+
     tick_dates = pd.to_datetime(weekly_data["report_date"], errors="coerce")
     tick_labels = tick_dates.dt.strftime("%Y-%m-%d").fillna("Invalid")
     ax.set_xticks(tick_dates.to_list())

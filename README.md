@@ -59,13 +59,29 @@ It is intended to run every Monday morning. Data from the current week is discar
 - `--start YYYY-MM-DD`  
   Start **reporting date** (typically a Monday). Window is inclusive.  
   Only annotations within the plotted window are drawn.  
-  **Validation:** if the date is in the future the script prints  
+
+  **Validation:** 
+  - if the date is in the future the script prints  
   `ERROR: --start date is in the future: <date>` and exits with code `2`.
 
 - `--weeks N`  
-  Number of weeks to display starting at `--start` (default: 12).  
-  **Validation:** if `N` is negative the script prints  
+  Number of weeks to display starting at `--start` (default: 12).
+
+  This option is ignored if --year is provided.
+
+  **Validation:** 
+  - if `N` is negative the script prints  
   `ERROR: --weeks must be non-negative. Got <N>.` and exits with code `2`.
+
+- `--year YYYY`
+  Selects a **calendar year** to plot. All weeks starting in that year are aggregated
+  and displayed.  
+  Mutually exclusive with `--start` and `--weeks`.  
+
+  **Validation:**  
+  - If the year is in the future, the script prints  
+    `ERROR: --year is in the future: <year>` and exits with code `2`.  
+  - If there is no data for that year, an empty dashboard is generated.
 
 ### Behavior
 
@@ -78,10 +94,13 @@ It is intended to run every Monday morning. Data from the current week is discar
 
 ```bash
 # Default: last 12 weeks
-PYTHONPATH=src python src/clonepulse/generate_clone_dashboard.py
+python src/clonepulse/generate_clone_dashboard.py
 
 # Reproducible window: 8 weeks from 2025-06-02
-PYTHONPATH=src python src/clonepulse/generate_clone_dashboard.py --start 2025-06-02 --weeks 8
+python src/clonepulse/generate_clone_dashboard.py --start 2025-06-02 --weeks 8
+
+# Full year 2025
+python src/clonepulse/generate_clone_dashboard.py --year 2025
 ````
 
 ---

@@ -252,3 +252,165 @@ def test_malformed_clone_entry_skipped(mock_parse_args, mock_get, temp_badges_di
     assert milestone_badge.exists()
     milestone = json.loads(milestone_badge.read_text())
     assert milestone["message"] == "Coming soon..."
+
+
+@mock.patch("clonepulse.fetch_clones.requests.get")
+@mock.patch("clonepulse.fetch_clones.parse_args")
+def test_max_annotation_updates_when_new_peak_arrives(mock_parse_args, mock_get, temp_badges_dir):
+    """
+    Verifies that when a new higher max 'count' appears, the script
+    replaces the previous 'Daily max: ...' annotation with the new one.
+    """
+    # Initial API payload with lower max (20 on 2024-06-02)
+    resp = {
+        "clones": [
+            {"timestamp": "2024-06-01T00:00:00Z", "count": 10, "uniques": 5},
+            {"timestamp": "2024-06-02T00:00:00Z", "count": 20, "uniques": 8},
+        ]
+    }
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = resp
+    mock_parse_args.return_value.user = "user"
+    mock_parse_args.return_value.repo = "repo"
+    os.environ["TOKEN"] = "fake-token"
+    # First run → max=20 on 2024-06-02
+    fc.main()
+    with open(fc.CLONES_FILE) as fh:
+        data1 = json.load(fh)
+    ann1 = [a for a in data1.get("annotations", []) if "daily max" in a["label"].lower()]
+    assert len(ann1) == 1
+    assert ann1[0]["date"] == "2024-06-02"
+    assert ann1[0]["label"] == "Daily max: 20"
+    # Second run with a new higher max (999 on 2024-06-03)
+    resp["clones"].append({"timestamp": "2024-06-03T00:00:00Z", "count": 999, "uniques": 10})
+    mock_get.return_value.json.return_value = resp
+    fc.main()
+    with open(fc.CLONES_FILE) as fh:
+        data2 = json.load(fh)
+    ann2 = [a for a in data2.get("annotations", []) if "daily max" in a["label"].lower()]
+    assert len(ann2) == 1, "There should be exactly one max annotation after replacement"
+    assert ann2[0]["date"] == "2024-06-03"
+    assert ann2[0]["label"] == "Daily max: 999"
+
+
+@mock.patch("clonepulse.fetch_clones.requests.get")
+@mock.patch("clonepulse.fetch_clones.parse_args")
+def test_idempotent_merge_produces_stable_json(mock_parse_args, mock_get, temp_badges_dir):
+    """
+    Running the fetcher twice with the exact same API payload should
+    produce identical JSON output (no duplicate days, stable annotations).
+    """
+    api_payload = {
+        "clones": [
+            {"timestamp": "2024-06-10T00:00:00Z", "count": 7, "uniques": 3},
+            {"timestamp": "2024-06-11T00:00:00Z", "count": 9, "uniques": 4},
+        ]
+    }
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = api_payload
+    mock_parse_args.return_value.user = "user"
+    mock_parse_args.return_value.repo = "repo"
+    os.environ["TOKEN"] = "fake-token"
+    # First run
+    fc.main()
+    json_v1 = Path(fc.CLONES_FILE).read_text()
+    # Second run with the same payload
+    fc.main()
+    json_v2 = Path(fc.CLONES_FILE).read_text()
+    assert json_v1 == json_v2, "JSON output must be stable across identical runs"
+    data = json.loads(json_v2)
+    assert len(data["daily"]) == 2
+    assert data["total_clones"] == 16
+    assert data["unique_clones"] == 7
+
+
+
+@mock.patch("clonepulse.fetch_clones.requests.get")
+@mock.patch("clonepulse.fetch_clones.parse_args")
+def test_milestone_badge_colors_progression(mock_parse_args, mock_get, temp_badges_dir):
+    """
+    As totals cross 500, 1000, 2000, the milestone badge color should progress:
+      - >=500  -> goldenrod
+      - >=1000 -> orange
+      - >=2000 -> red
+    """
+    mock_parse_args.return_value.user = "user"
+    mock_parse_args.return_value.repo = "repo"
+    os.environ["TOKEN"] = "fake-token"
+    badge_path = Path(temp_badges_dir) / "milestone_badge.json"
+    # Hit 500 (goldenrod)
+    resp = {
+        "clones": [
+            {"timestamp": "2024-06-01T00:00:00Z", "count": 500, "uniques": 100},
+        ]
+    }
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = resp
+    fc.main()
+    badge = json.loads(badge_path.read_text())
+    assert badge["message"].startswith("500 clones")
+    assert badge["color"] == "goldenrod"
+    # Hit 1000 (orange) by adding another 500
+    resp["clones"].append({"timestamp": "2024-06-02T00:00:00Z", "count": 500, "uniques": 80})
+    mock_get.return_value.json.return_value = resp
+    fc.main()
+    badge = json.loads(badge_path.read_text())
+    assert badge["message"].startswith("1000 clones")
+    assert badge["color"] == "orange"
+    # Hit 2000 (red) by adding another 1000
+    resp["clones"].append({"timestamp": "2024-06-03T00:00:00Z", "count": 1000, "uniques": 120})
+    mock_get.return_value.json.return_value = resp
+    fc.main()
+    badge = json.loads(badge_path.read_text())
+    assert badge["message"].startswith("2000 clones")
+    assert badge["color"] == "red"
+
+
+
+@mock.patch("clonepulse.fetch_clones.requests.get")
+@mock.patch("clonepulse.fetch_clones.parse_args")
+def test_max_annotation_stable_when_only_nonmax_days_change(mock_parse_args, mock_get, temp_badges_dir):
+    """
+    The 'Daily max: ...' annotation must remain stable when updates only affect
+    non-max days. We start with a clear max on 2024-06-02 (count=50), then
+    increase 2024-06-01 from 10 -> 40 (< 50). The max annotation should not change.
+    """
+    # --- Initial payload: max at 2024-06-02 (50) ---
+    resp = {
+        "clones": [
+            {"timestamp": "2024-06-01T00:00:00Z", "count": 10, "uniques": 5},
+            {"timestamp": "2024-06-02T00:00:00Z", "count": 50, "uniques": 20},  # global max
+            {"timestamp": "2024-06-03T00:00:00Z", "count": 12, "uniques": 7},
+        ]
+    }
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = resp
+    mock_parse_args.return_value.user = "user"
+    mock_parse_args.return_value.repo = "repo"
+    os.environ["TOKEN"] = "fake-token"
+    # Run 1: establish baseline max annotation (2024-06-02 -> 50)
+    fc.main()
+    with open(fc.CLONES_FILE) as fh:
+        data_before = json.load(fh)
+    max_anns_before = [a for a in data_before.get("annotations", []) if "daily max" in a["label"].lower()]
+    assert len(max_anns_before) == 1, "There should be a single max annotation after first run"
+    assert max_anns_before[0]["date"] == "2024-06-02"
+    assert max_anns_before[0]["label"] == "Daily max: 50"
+    # --- Update a NON-MAX day only (still below 50) ---
+    # Bump 2024-06-01 from 10 -> 40
+    resp["clones"][0] = {"timestamp": "2024-06-01T00:00:00Z", "count": 40, "uniques": 9}
+    mock_get.return_value.json.return_value = resp
+    # Run 2: merge updated non-max; max annotation should remain the same
+    fc.main()
+    with open(fc.CLONES_FILE) as fh:
+        data_after = json.load(fh)
+    # The 'daily' list should still have exactly 3 entries (no duplication)
+    assert len(data_after["daily"]) == 3
+    max_anns_after = [a for a in data_after.get("annotations", []) if "daily max" in a["label"].lower()]
+    assert len(max_anns_after) == 1, "There should still be exactly one max annotation"
+    assert max_anns_after[0]["date"] == "2024-06-02", "Max annotation date must remain unchanged"
+    assert max_anns_after[0]["label"] == "Daily max: 50", "Max annotation label must remain unchanged"
+    # Sanity: totals should reflect the updated non-max day
+    # Before: 10 + 50 + 12 = 72 ; After: 40 + 50 + 12 = 102
+    assert data_after["total_clones"] == 102
+
