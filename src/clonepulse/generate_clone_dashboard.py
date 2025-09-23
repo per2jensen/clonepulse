@@ -71,6 +71,16 @@ def render_empty_dashboard(message: str):
         fontsize=14, color="gray",
         wrap=True, transform=ax.transAxes,
     )
+    # Footer on empty dashboard too
+    gen_time = pd.Timestamp.utcnow().tz_convert(None).strftime("%Y-%m-%d %H:%M UTC")
+    fig.text(
+        0.99, 0.01,
+        f"Generated {gen_time} by https://github.com/per2jensen/clonepulse",
+        ha="right", va="bottom",
+        fontsize=8,
+        color="#d98c3f",
+        alpha=0.7,
+    )
     os.makedirs(os.path.dirname(OUTPUT_PNG), exist_ok=True)
     plt.savefig(OUTPUT_PNG)
     print("Empty dashboard generated.")
@@ -381,6 +391,19 @@ def main(argv=None):
 
     ax.legend(loc="lower left", fontsize=9)
     plt.tight_layout()
+
+    # Reserve bottom margin for footer, then render footer inside the figure box
+    plt.tight_layout(rect=[0, 0.02, 1, 1])  # 8% bottom margin
+    # --- Footer: provenance note with generation timestamp (UTC) ---
+    gen_time = pd.Timestamp.utcnow().tz_convert(None).strftime("%Y-%m-%d %H:%M UTC")
+    fig.text(
+        0.99, 0.01,
+        f"Generated {gen_time} by https://github.com/per2jensen/clonepulse",
+        ha="right", va="bottom",
+        fontsize=8,
+        color="#d98c3f",  # soft orange-ish
+        alpha=0.7,
+    )
 
     os.makedirs(os.path.dirname(OUTPUT_PNG), exist_ok=True)
     plt.savefig(OUTPUT_PNG)
