@@ -358,21 +358,35 @@ def main(argv=None):
 
     ymin, ymax = ax.get_ylim()
     label_y = ymin + 0.97 * (ymax - ymin)
-    offset_step_pts = 12
+    vertical_offset_step_pts = 9
+    vertical_offset_base = 3
+    horizontal_offset_base = 8
+    horizontal_offset_step = 4
 
     if not annotation_df.empty:
         for ann_date, group in annotation_df.groupby("date", sort=True):
             ax.axvline(x=ann_date, linestyle=":", linewidth=1)
-            for i, (_, row) in enumerate(group.iterrows()):
+            side_counts = {"left": 0, "right": 0}
+            for _, row in group.iterrows():
                 label = _truncate_on_word_boundary(row["label"], max_chars)
+                # Alternate annotation placement left/right of the date line
+                side = "right" if side_counts["right"] <= side_counts["left"] else "left"
+                side_index = side_counts[side]
+                side_counts[side] += 1
+
+                horizontal_direction = 1 if side == "right" else -1
+                horizontal_offset = horizontal_direction * (
+                    horizontal_offset_base + side_index * horizontal_offset_step
+                )
+                vertical_offset = -vertical_offset_base - side_index * vertical_offset_step_pts
                 ax.annotate(
                     label,
                     xy=(ann_date, label_y),
-                    xytext=(0, -5 - i * offset_step_pts),
+                    xytext=(horizontal_offset, vertical_offset),
                     textcoords="offset points",
                     rotation=90,
                     fontsize=10,
-                    ha="center",
+                    ha="left" if side == "right" else "right",
                     va="top",
                     color="dimgray",
                     clip_on=True,
