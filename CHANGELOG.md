@@ -3,9 +3,13 @@
 All notable changes to **ClonePulse** will be documented in this file.  
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
----
+## 1.0.4 - 2025-11-10
 
-## [1.0.3]
+### Changed
+
+- Annotations evenly distributed around a date
+
+## 1.0.3
 
 ### Added
 
@@ -23,26 +27,20 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - CLI help text updated to clarify `--weeks` is ignored when `--year` is provided
 - README reorganized and simplified for end-users
 
----
-
-## [1.0.2] – 2025-09-22
+## 1.0.2 – 2025-09-22
 
 ### Changed
 
 - Added --start and --weeks to create dashboard for a specified period
 - Doc changes
 
----
-
-## [1.0.1] – 2025-07-11
+## 1.0.1 – 2025-07-11
 
 ### Changed
 
 - Doc fixes
 
----
-
-## [1.0.0] – 2025-06-19
+## 1.0.0 – 2025-06-19
 
 ### Added
 
