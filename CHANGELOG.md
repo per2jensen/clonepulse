@@ -3,6 +3,17 @@
 All notable changes to **ClonePulse** will be documented in this file.  
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.5
+
+### Added
+
+- Dashboard banner now shows repo context when provided via `--user/--repo` or `GITHUB_USER` / `GITHUB_REPO` (falls back to whichever values are available).
+
+### Changed
+
+- Milestone badge messages now use compact labels (e.g., `500+ clones`, `1k+ clones`, `2k+ clones`) to align with milestone tiers.
+- README updated with the new dashboard CLI options and title behavior.
+
 ## 1.0.4 - 2025-11-10
 
 ### Changed

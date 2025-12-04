@@ -131,7 +131,7 @@ def test_fetch_clones_end_to_end(mock_parse_args, mock_get, temp_badges_dir):
     assert updated["message"] == "530"
 
     milestone = json.loads(milestone_file.read_text())
-    assert "500 clones" in milestone["message"]
+    assert milestone["message"] == "500+ clones"
 
 
 def test_missing_token(monkeypatch):
@@ -348,21 +348,21 @@ def test_milestone_badge_colors_progression(mock_parse_args, mock_get, temp_badg
     mock_get.return_value.json.return_value = resp
     fc.main()
     badge = json.loads(badge_path.read_text())
-    assert badge["message"].startswith("500 clones")
+    assert badge["message"] == "500+ clones"
     assert badge["color"] == "goldenrod"
     # Hit 1000 (orange) by adding another 500
     resp["clones"].append({"timestamp": "2024-06-02T00:00:00Z", "count": 500, "uniques": 80})
     mock_get.return_value.json.return_value = resp
     fc.main()
     badge = json.loads(badge_path.read_text())
-    assert badge["message"].startswith("1000 clones")
+    assert badge["message"] == "1k+ clones"
     assert badge["color"] == "orange"
     # Hit 2000 (red) by adding another 1000
     resp["clones"].append({"timestamp": "2024-06-03T00:00:00Z", "count": 1000, "uniques": 120})
     mock_get.return_value.json.return_value = resp
     fc.main()
     badge = json.loads(badge_path.read_text())
-    assert badge["message"].startswith("2000 clones")
+    assert badge["message"] == "2k+ clones"
     assert badge["color"] == "red"
 
 
@@ -413,4 +413,3 @@ def test_max_annotation_stable_when_only_nonmax_days_change(mock_parse_args, moc
     # Sanity: totals should reflect the updated non-max day
     # Before: 10 + 50 + 12 = 72 ; After: 40 + 50 + 12 = 102
     assert data_after["total_clones"] == 102
-

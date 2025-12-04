@@ -86,6 +86,22 @@ A weekly clone activity chart is automatically updated and saved in `clonepulse/
          --start 2025-06-02 --weeks 8
    ```
 
+   **Dashboard title & repo label**  
+   - Banner title always says “Weekly Clone Metrics”.  
+   - If you provide `--user` and `--repo`, the banner also shows `user/repo`.
+   - If only one is provided, that single value is shown.  
+   - If neither flag is passed, the script falls back to env vars `GITHUB_USER` / `GITHUB_REPO` for the label.
+
+   **Additional CLI options** (can also be used locally):
+
+   ```bash
+   PYTHONPATH=src python src/clonepulse/generate_clone_dashboard.py \
+     [--user your-username] \
+     [--repo your-repo] \
+     [--start YYYY-MM-DD --weeks N] \
+     [--year YYYY]
+   ```
+
 ---
 
 ## Token Setup
