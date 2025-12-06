@@ -26,15 +26,17 @@ A weekly clone activity chart is automatically updated and saved in `clonepulse/
 - Discards partial weeks
 - Shows only complete Monday–Sunday periods
 
-![Standard clone dashboard, last 12 weeks](example/default.png)
+![Standard clone dashboard, last 16 weeks](example/default.png)
+<sub>Command: `python src/clonepulse/generate_clone_dashboard.py --user per2jensen --repo clonepulse`</sub>
+
 
 ### Reproducible window (`--start` + `--weeks`)
 ![Dashboard starting 2025-08-15 for 6 weeks](example/start-example.png)  
-<sub>Command: `python src/clonepulse/generate_clone_dashboard.py --start 2025-08-15 --weeks 6`</sub>
+<sub>Command: `python src/clonepulse/generate_clone_dashboard.py --start 2025-09-01 --weeks 8  --user per2jensen --repo clonepulse`</sub>
 
 ### Calendar year (`--year`)
 ![Dashboard for calendar year 2025 (to date)](example/year-example.png)  
-<sub>Command: `python src/clonepulse/generate_clone_dashboard.py --year 2025`</sub>
+<sub>Command: `python src/clonepulse/generate_clone_dashboard.py --year 2025 --user per2jensen --repo clonepulse`</sub>
 
 ---
 
