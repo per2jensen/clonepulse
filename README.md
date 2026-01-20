@@ -15,6 +15,8 @@ ClonePulse can generate badges you can embed in your repo:
 [![# clones](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/badge_clones.json)](https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/weekly_clones.png)  
 [![Milestone](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/milestone_badge.json)](https://raw.githubusercontent.com/per2jensen/clonepulse/main/clonepulse/weekly_clones.png)
 
+A click on a badge takes you to the dashboard.
+
 ---
 
 ## Example dashboards
