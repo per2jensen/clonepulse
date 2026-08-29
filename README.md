@@ -99,7 +99,10 @@ A weekly clone activity chart is automatically updated and saved in `clonepulse/
    See [🔐 Token Setup](#-token-setup) below.
 
 2. **Drop essentials into your repo**  
-   Copy the contents of `clonepulse/` and `src/clonepulse/` plus the workflows in `.github/workflows/`.
+   Copy `clonepulse/`, `src/clonepulse/`, `pyproject.toml`, and the workflows in
+   `.github/workflows/`. If the destination already has a `pyproject.toml`, add
+   ClonePulse's runtime dependencies and ensure its build configuration includes
+   the `src/clonepulse/` package.
 
 3. **Add badges to your README**  
    Replace `your-username/your-repo`:
@@ -118,7 +121,7 @@ A weekly clone activity chart is automatically updated and saved in `clonepulse/
      env:
        TOKEN: ${{ secrets.CLONEPULSE_METRICS }}
      run: |
-       PYTHONPATH=src python src/clonepulse/fetch_clones.py \
+       python -m clonepulse.fetch_clones \
          --user <your GitHub login> \
          --repo <your repo>
    ```
@@ -129,7 +132,7 @@ A weekly clone activity chart is automatically updated and saved in `clonepulse/
 
    ```yaml
    - name: Render dashboard
-     run: PYTHONPATH=src python src/clonepulse/generate_clone_dashboard.py
+     run: python -m clonepulse.generate_clone_dashboard
    ```
 
    Reproducible window:
@@ -137,7 +140,7 @@ A weekly clone activity chart is automatically updated and saved in `clonepulse/
    ```yaml
    - name: Render dashboard
      run: |
-       PYTHONPATH=src python src/clonepulse/generate_clone_dashboard.py \
+       python -m clonepulse.generate_clone_dashboard \
          --start 2025-06-02 --weeks 8
    ```
 
@@ -205,7 +208,7 @@ For **private repos**:
 - name: Run fetch_clones.py
   env:
     TOKEN: ${{ secrets.CLONEPULSE_METRICS }}
-  run: python src/clonepulse/fetch_clones.py
+  run: python -m clonepulse.fetch_clones
 ```
 
 ---

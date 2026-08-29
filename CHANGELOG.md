@@ -17,7 +17,15 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Runtime, test, build, and publishing dependencies refreshed to current supported releases.
 - Development dependency declarations deduplicated and bounded by major version.
 - Dashboard UTC timestamp handling updated for pandas 3 and future pandas 4 compatibility.
-- GitHub workflows now use current checkout and Python setup actions.
+- Package license metadata now uses the current SPDX-based packaging standard.
+- GitHub workflows now use immutable action revisions, least-privilege permissions,
+  bounded runtimes, installed package modules, and strict push failure handling.
+- GitHub API requests now use bounded connect/read timeouts with contextual errors.
+
+### Maintenance
+
+- Dependabot now checks Python dependencies and GitHub Actions weekly.
+- Duplicate test and fixture definitions removed so every declared test is collected.
 
 ## 1.0.5
 

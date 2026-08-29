@@ -2,7 +2,6 @@ name: Update GitHub Clone Metrics
 
 permissions:
   contents: write
-  pull-requests: write
 
 concurrency:
   group: clone-metrics
@@ -16,24 +15,25 @@ on:
 jobs:
   update-clones:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install requests
+        run: python -m pip install .
 
       - name: Run fetch_clones.py
         env:
           TOKEN: ${{ secrets.CLONEPULSE_METRICS }}
         run: |
-          PYTHONPATH=src python src/clonepulse/fetch_clones.py \
+          python -m clonepulse.fetch_clones \
             --user per2jensen \
             --repo clonepulse
 
@@ -51,16 +51,15 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config --local user.name "github-actions"
+          git config --local user.email "actions@github.com"
 
-          # Check for changes before committing
-          if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+          find clonepulse -type f \( -name '*.json' -o -name '*.txt' \) -print0 \
+            | xargs -0 --no-run-if-empty git add --
+          if ! git diff --cached --quiet; then
             echo "Changes detected, committing..."
-            git add $(find clonepulse -type f \( -name '*.json' -o -name '*.txt' \)) || true
             git commit -m "CI update: 'fetched clones' data on $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
-            # Push changes — if it fails, likely due to race; next run will retry
-            git push || echo "⚠️ Push failed (likely a fast-forward conflict). Will retry next time."
+            git push
           else
             echo "No changes to commit."
           fi

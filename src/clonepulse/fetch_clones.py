@@ -12,6 +12,7 @@ import os
 import json
 import requests
 import argparse
+import logging
 import re
 from typing import Any
 from urllib.parse import quote
@@ -31,6 +32,9 @@ BADGE_CLONES = "badge_clones.json"
 RATIO_THRESHOLD = 25.0
 IMPUTE_WINDOW = 7
 SUMMARY_PERIODS = (7, 30)
+REQUEST_TIMEOUT: tuple[float, float] = (5.0, 30.0)
+
+LOGGER = logging.getLogger(__name__)
 
 
 def filter_abnormal_days(
@@ -327,9 +331,24 @@ def main() -> None:
 
     # Fetch clone data from GitHub API
     API_URL = f"https://api.github.com/repos/{quote(args.user)}/{quote(args.repo)}/traffic/clones"
-    response = requests.get(API_URL, headers=HEADERS)
-    response.raise_for_status()
-    data = response.json()
+    try:
+        response = requests.get(
+            API_URL,
+            headers=HEADERS,
+            timeout=REQUEST_TIMEOUT,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except requests.RequestException as error:
+        LOGGER.error(
+            "GitHub clone API request failed for %s/%s: %s",
+            args.user,
+            args.repo,
+            error,
+        )
+        raise RuntimeError(
+            f"GitHub clone API request failed for {args.user}/{args.repo}."
+        ) from error
     if not data.get("clones"):
         print("⚠️ No clone data returned from GitHub API.")
         exit(0)

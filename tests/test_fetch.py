@@ -4,8 +4,6 @@ import argparse
 import clonepulse.fetch_clones as fc
 import json
 import os
-import os
-import pytest
 import pytest
 import shutil
 import tempfile
@@ -95,6 +93,12 @@ def test_fetch_clones_end_to_end(mock_parse_args, mock_get, temp_badges_dir):
     # Run main logic
     fc.main()
 
+    mock_get.assert_called_with(
+        "https://api.github.com/repos/dummy-user/dummy-repo/traffic/clones",
+        headers=mock.ANY,
+        timeout=fc.REQUEST_TIMEOUT,
+    )
+
     # Check fetch_clones.json was created and values correct
     clones_file = Path(fc.CLONES_FILE)
     assert clones_file.exists()
@@ -151,14 +155,44 @@ def test_missing_token(monkeypatch):
 @mock.patch("clonepulse.fetch_clones.parse_args")
 def test_api_error_response(mock_parse_args, mock_get):
     mock_get.return_value.status_code = 403
-    mock_get.return_value.raise_for_status.side_effect = Exception("403 Forbidden")
+    mock_get.return_value.raise_for_status.side_effect = fc.requests.HTTPError(
+        "403 Forbidden"
+    )
 
     mock_parse_args.return_value.user = "user"
     mock_parse_args.return_value.repo = "repo"
     os.environ["TOKEN"] = "fake-token"
 
-    with pytest.raises(Exception, match="403 Forbidden"):
+    with pytest.raises(
+        RuntimeError,
+        match="GitHub clone API request failed for user/repo",
+    ):
         fc.main()
+
+
+@mock.patch("clonepulse.fetch_clones.requests.get")
+@mock.patch("clonepulse.fetch_clones.parse_args")
+def test_api_timeout_raises_contextual_runtime_error(
+    mock_parse_args: mock.MagicMock,
+    mock_get: mock.MagicMock,
+) -> None:
+    """Report a bounded GitHub API timeout with repository context."""
+    mock_parse_args.return_value.user = "user"
+    mock_parse_args.return_value.repo = "repo"
+    mock_get.side_effect = fc.requests.Timeout("read timed out")
+    os.environ["TOKEN"] = "fake-token"
+
+    with pytest.raises(
+        RuntimeError,
+        match="GitHub clone API request failed for user/repo",
+    ):
+        fc.main()
+
+    mock_get.assert_called_once_with(
+        "https://api.github.com/repos/user/repo/traffic/clones",
+        headers=mock.ANY,
+        timeout=fc.REQUEST_TIMEOUT,
+    )
 
 
 
@@ -177,36 +211,6 @@ def test_no_clones_key(mock_parse_args, mock_get, capsys):
 
     captured = capsys.readouterr()
     assert "⚠️ No clone data returned" in captured.out
-
-
-import os
-import json
-import tempfile
-import shutil
-from pathlib import Path
-from unittest import mock
-import pytest
-import clonepulse.fetch_clones as fc
-
-@pytest.fixture
-def temp_badges_dir():
-    """Create a temporary badges dir and override constants."""
-    orig_clones_file = fc.CLONES_FILE
-    orig_badge_dir = fc.BADGE_DIR
-    orig_badge_clones = fc.BADGE_CLONES
-
-    tmpdir = tempfile.mkdtemp()
-    fc.CLONES_FILE = os.path.join(tmpdir, "fetch_clones.json")
-    fc.BADGE_DIR = tmpdir
-    fc.BADGE_CLONES = "badge_clones.json"
-
-    yield tmpdir
-
-    # Cleanup and restore constants
-    shutil.rmtree(tmpdir)
-    fc.CLONES_FILE = orig_clones_file
-    fc.BADGE_DIR = orig_badge_dir
-    fc.BADGE_CLONES = orig_badge_clones
 
 
 @mock.patch("clonepulse.fetch_clones.requests.get")

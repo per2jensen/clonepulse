@@ -45,12 +45,6 @@ def write_json_with_future_date(path):
     with open(path, "w") as f:
         json.dump({"daily": daily}, f)
 
-def test_rejects_future_timestamp(temp_env):
-    import clonepulse.generate_clone_dashboard as dash
-    write_json_with_future_date(dash.CLONES_FILE)
-    with pytest.raises(ValueError, match=r"Row \d+ timestamp is in the future"):
-        dash.main()
-
 # --- Fixtures ---
 @pytest.fixture
 def temp_env():
@@ -71,7 +65,7 @@ def test_generate_dashboard_png(temp_env):
 def test_rejects_future_timestamp(temp_env):
     import clonepulse.generate_clone_dashboard as dash
     write_json_with_future_date(dash.CLONES_FILE)
-    with pytest.raises(ValueError, match="timestamp is in the future"):
+    with pytest.raises(ValueError, match=r"Row \d+ timestamp is in the future"):
         dash.main()
 
 def test_insufficient_data_logged_and_skipped(temp_env, capsys):
