@@ -32,8 +32,23 @@ This document is for contributors and developers working on ClonePulse itself.
 
 - Weekly aggregation: Monday–Sunday, reported the following Monday.  
 - Current (partial) week excluded.  
+- Abnormal clone days use their stored `imputed_count`; days without an
+  imputation are skipped.
 - Duplicate-date annotations are stacked vertically.  
 - Long labels truncated on word boundaries.
+
+## Fetcher calculations
+
+`fetch_clones.py` recalculates outlier flags and summaries from the complete
+stored daily history on every successful refresh. Days with a clone-to-unique
+ratio greater than `RATIO_THRESHOLD` are excluded from filtered totals. The
+7-day and 30-day windows are anchored to the newest stored date and average
+only non-discarded records; their `days_included` and `days_discarded` fields
+document the denominator.
+
+The root `summary` key is deliberately written first. Lifetime totals are
+available as `summary.total_clones`, `summary.unique_clones`, and
+`summary.total_clones_raw`; they are no longer duplicated at the JSON root.
 
 ### Examples
 

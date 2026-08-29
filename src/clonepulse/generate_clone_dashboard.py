@@ -21,8 +21,14 @@ serves as input for this dashboard.
 JSON Input Format:
 ------------------
 {
-  "total_clones": 845,
-  "unique_clones": 418,
+  "summary": {
+    "total_clones": 845,
+    "unique_clones": 418,
+    "total_clones_raw": 845,
+    "last_7_days": {...},
+    "last_30_days": {...},
+    "last_refresh": {...}
+  },
   "daily": [
     {
       "timestamp": "YYYY-MM-DDTHH:MM:SSZ",
@@ -195,8 +201,22 @@ def main(argv=None):
         return
 
     validated_rows = []
+    discarded_count = 0
+    imputed_rows = 0
     now_ts = _utcnow_naive()
     for i, row in enumerate(raw_rows):
+        if not isinstance(row, dict):
+            raise ValueError(f"Row {i} must be an object.")
+        discarded = row.get("discarded", False)
+        if not isinstance(discarded, bool):
+            raise ValueError(f"Row {i} has invalid discarded flag: {discarded}")
+        if discarded:
+            discarded_count += 1
+            if "imputed_count" not in row:
+                continue
+            row = {**row, "count": row["imputed_count"]}
+            imputed_rows += 1
+
         try:
             ts = pd.to_datetime(row["timestamp"], utc=True)
         except Exception:
@@ -212,6 +232,13 @@ def main(argv=None):
             raise ValueError(f"Row {i} has invalid uniques: {uniques}")
 
         validated_rows.append({"timestamp": ts, "count": count, "uniques": uniques})
+
+    if discarded_count:
+        skipped = discarded_count - imputed_rows
+        print(
+            f"🚫 {discarded_count} discarded day(s): {imputed_rows} imputed, "
+            f"{skipped} skipped (no preceding data)."
+        )
 
     df = pd.DataFrame(validated_rows)
     if df.shape[0] < 7:
@@ -349,7 +376,9 @@ def main(argv=None):
                 continue
             valid_annotations.append({"date": ann_date, "label": label})
 
-    annotation_df = pd.DataFrame(valid_annotations).sort_values("date")
+    annotation_df = pd.DataFrame(valid_annotations, columns=["date", "label"])
+    if not annotation_df.empty:
+        annotation_df = annotation_df.sort_values("date")
 
     # Keep only annotations within the plotted time window
     if not annotation_df.empty:

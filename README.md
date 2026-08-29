@@ -19,6 +19,57 @@ A click on a badge takes you to the dashboard.
 
 ---
 
+## Clone data summary and outlier handling
+
+`clonepulse/fetch_clones.json` starts with a `summary` object containing filtered
+lifetime totals, raw clone totals, 7-day and 30-day totals and daily averages,
+and a snapshot of the totals at the last refresh. Rolling periods end on the
+newest stored day; `days_included` and `days_discarded` make each average's
+denominator explicit.
+
+ClonePulse marks a day as abnormal when its clone-to-unique-cloner ratio is
+greater than `25`. A positive clone count with zero unique cloners is also
+abnormal. These days remain in `daily` with their raw values and are described
+in `discard`, but they do not contribute to summaries, badges, milestones, or
+the daily-max annotation. The dashboard replaces an abnormal clone count with
+the rounded average of up to seven preceding normal days.
+
+```json
+{
+  "summary": {
+    "total_clones": 4437,
+    "unique_clones": 2934,
+    "total_clones_raw": 4437,
+    "last_7_days": {
+      "total_clones": 37,
+      "unique_clones": 29,
+      "average_daily_clones": 5.29,
+      "average_daily_unique_clones": 4.14,
+      "days_included": 7,
+      "days_discarded": 0
+    },
+    "last_30_days": {
+      "total_clones": 197,
+      "unique_clones": 143,
+      "average_daily_clones": 6.57,
+      "average_daily_unique_clones": 4.77,
+      "days_included": 30,
+      "days_discarded": 0
+    },
+    "last_refresh": {
+      "timestamp": "2026-08-29T02:29:25Z",
+      "total_clones": 4437,
+      "unique_clones": 2934
+    }
+  },
+  "annotations": [],
+  "discard": [],
+  "daily": []
+}
+```
+
+---
+
 ## Example dashboards
 
 ### Weekly dashboard (default)

@@ -102,8 +102,9 @@ def test_fetch_clones_end_to_end(mock_parse_args, mock_get, temp_badges_dir):
     with clones_file.open() as f:
         data = json.load(f)
 
-    assert data["total_clones"] == 30
-    assert data["unique_clones"] == 13
+    assert next(iter(data)) == "summary"
+    assert data["summary"]["total_clones"] == 30
+    assert data["summary"]["unique_clones"] == 13
     assert any("Daily max" in a["label"] for a in data["annotations"])
 
     # Check badge_clones.json
@@ -123,7 +124,7 @@ def test_fetch_clones_end_to_end(mock_parse_args, mock_get, temp_badges_dir):
 
     # Trigger again with >500 total clones to test milestone badge
     mock_get.return_value.json.return_value["clones"].append(
-        {"timestamp": "2024-06-03T00:00:00Z", "count": 500, "uniques": 10}
+        {"timestamp": "2024-06-03T00:00:00Z", "count": 500, "uniques": 25}
     )
     fc.main()
 
@@ -238,8 +239,8 @@ def test_malformed_clone_entry_skipped(mock_parse_args, mock_get, temp_badges_di
         data = json.load(f)
 
     assert data["daily"] == []
-    assert data["total_clones"] == 0
-    assert data["unique_clones"] == 0
+    assert data["summary"]["total_clones"] == 0
+    assert data["summary"]["unique_clones"] == 0
     assert data.get("annotations") == []
 
     # Check that badge files still exist with default values
@@ -252,6 +253,43 @@ def test_malformed_clone_entry_skipped(mock_parse_args, mock_get, temp_badges_di
     assert milestone_badge.exists()
     milestone = json.loads(milestone_badge.read_text())
     assert milestone["message"] == "Coming soon..."
+
+
+@mock.patch("clonepulse.fetch_clones.requests.get")
+@mock.patch("clonepulse.fetch_clones.parse_args")
+def test_abnormal_day_excluded_from_totals_badge_and_max(
+    mock_parse_args, mock_get, temp_badges_dir
+):
+    """An abnormal day remains auditable but cannot affect public totals."""
+    mock_get.return_value.status_code = 200
+    mock_get.return_value.json.return_value = {
+        "clones": [
+            {"timestamp": "2024-06-01T00:00:00Z", "count": 10, "uniques": 5},
+            {"timestamp": "2024-06-02T00:00:00Z", "count": 500, "uniques": 1},
+        ]
+    }
+    mock_parse_args.return_value.user = "user"
+    mock_parse_args.return_value.repo = "repo"
+    os.environ["TOKEN"] = "fake-token"
+
+    fc.main()
+
+    data = json.loads(Path(fc.CLONES_FILE).read_text())
+    badge = json.loads(
+        (Path(temp_badges_dir) / fc.BADGE_CLONES).read_text()
+    )
+    max_annotations = [
+        annotation
+        for annotation in data["annotations"]
+        if "daily max" in annotation["label"].lower()
+    ]
+    assert data["summary"]["total_clones"] == 10
+    assert data["summary"]["unique_clones"] == 5
+    assert data["summary"]["total_clones_raw"] == 510
+    assert data["discard"][0]["date"] == "2024-06-02"
+    assert data["daily"][1]["discarded"] is True
+    assert badge["message"] == "10"
+    assert max_annotations == [{"date": "2024-06-01", "label": "Daily max: 10"}]
 
 
 @mock.patch("clonepulse.fetch_clones.requests.get")
@@ -282,7 +320,7 @@ def test_max_annotation_updates_when_new_peak_arrives(mock_parse_args, mock_get,
     assert ann1[0]["date"] == "2024-06-02"
     assert ann1[0]["label"] == "Daily max: 20"
     # Second run with a new higher max (999 on 2024-06-03)
-    resp["clones"].append({"timestamp": "2024-06-03T00:00:00Z", "count": 999, "uniques": 10})
+    resp["clones"].append({"timestamp": "2024-06-03T00:00:00Z", "count": 999, "uniques": 40})
     mock_get.return_value.json.return_value = resp
     fc.main()
     with open(fc.CLONES_FILE) as fh:
@@ -313,15 +351,16 @@ def test_idempotent_merge_produces_stable_json(mock_parse_args, mock_get, temp_b
     os.environ["TOKEN"] = "fake-token"
     # First run
     fc.main()
-    json_v1 = Path(fc.CLONES_FILE).read_text()
+    data_v1 = json.loads(Path(fc.CLONES_FILE).read_text())
     # Second run with the same payload
     fc.main()
-    json_v2 = Path(fc.CLONES_FILE).read_text()
-    assert json_v1 == json_v2, "JSON output must be stable across identical runs"
-    data = json.loads(json_v2)
+    data = json.loads(Path(fc.CLONES_FILE).read_text())
+    data_v1["summary"]["last_refresh"]["timestamp"] = "REFRESHED"
+    data["summary"]["last_refresh"]["timestamp"] = "REFRESHED"
+    assert data_v1 == data, "Only the refresh timestamp may change across identical runs"
     assert len(data["daily"]) == 2
-    assert data["total_clones"] == 16
-    assert data["unique_clones"] == 7
+    assert data["summary"]["total_clones"] == 16
+    assert data["summary"]["unique_clones"] == 7
 
 
 
@@ -412,4 +451,4 @@ def test_max_annotation_stable_when_only_nonmax_days_change(mock_parse_args, moc
     assert max_anns_after[0]["label"] == "Daily max: 50", "Max annotation label must remain unchanged"
     # Sanity: totals should reflect the updated non-max day
     # Before: 10 + 50 + 12 = 72 ; After: 40 + 50 + 12 = 102
-    assert data_after["total_clones"] == 102
+    assert data_after["summary"]["total_clones"] == 102

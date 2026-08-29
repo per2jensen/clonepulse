@@ -3,6 +3,17 @@
 All notable changes to **ClonePulse** will be documented in this file.  
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- Abnormal clone-day detection with seven-day dashboard imputation and discard metadata.
+- Top-level JSON summary with filtered/raw totals, 7-day and 30-day averages, and the last refresh snapshot.
+
+### Changed
+
+- Total and unique clone values now live under `summary` and exclude abnormal days.
+
 ## 1.0.5
 
 ### Added

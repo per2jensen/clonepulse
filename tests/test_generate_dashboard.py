@@ -23,11 +23,13 @@ def write_test_json(path):
     ]
 
     json_data = {
+        "summary": {
+            "total_clones": 999,
+            "unique_clones": 500,
+        },
         "annotations": [
             {"date": (base + pd.Timedelta(days=3)).strftime("%Y-%m-%d"), "label": "Some event"}
         ],
-        "total_clones": 999,
-        "unique_clones": 500,
         "daily": daily
     }
 
@@ -123,3 +125,51 @@ def test_empty_dashboard_when_not_enough_days(temp_env, capsys):
     assert "Not enough daily data" in captured.out
 
 
+def test_discarded_dashboard_days_are_imputed_or_skipped(temp_env, capsys):
+    """Dashboard uses imputed clone counts and skips entries without replacements."""
+    import clonepulse.generate_clone_dashboard as dash
+
+    base = pd.Timestamp.utcnow().normalize() - pd.Timedelta(days=21)
+    daily = [
+        {
+            "timestamp": (base + pd.Timedelta(days=index)).isoformat(),
+            "count": 10,
+            "uniques": 5,
+        }
+        for index in range(8)
+    ]
+    daily[0].update({"count": 500, "uniques": 1, "discarded": True})
+    daily[1].update(
+        {"count": 500, "uniques": 1, "discarded": True, "imputed_count": 10}
+    )
+    with open(dash.CLONES_FILE, "w") as file_handle:
+        json.dump({"daily": daily}, file_handle)
+
+    dash.main()
+
+    captured = capsys.readouterr()
+    assert "2 discarded day(s): 1 imputed, 1 skipped" in captured.out
+    assert os.path.exists(dash.OUTPUT_PNG)
+
+
+def test_invalid_discarded_flag_is_rejected(temp_env):
+    """Dashboard rejects ambiguous discard marker values."""
+    import clonepulse.generate_clone_dashboard as dash
+
+    with open(dash.CLONES_FILE, "w") as file_handle:
+        json.dump(
+            {
+                "daily": [
+                    {
+                        "timestamp": "2025-06-01T00:00:00Z",
+                        "count": 10,
+                        "uniques": 5,
+                        "discarded": "yes",
+                    }
+                ]
+            },
+            file_handle,
+        )
+
+    with pytest.raises(ValueError, match="invalid discarded flag"):
+        dash.main()

@@ -1,12 +1,37 @@
 {
+  "summary": {
+    "total_clones": 4437,
+    "unique_clones": 2934,
+    "total_clones_raw": 4437,
+    "last_7_days": {
+      "total_clones": 37,
+      "unique_clones": 29,
+      "average_daily_clones": 5.29,
+      "average_daily_unique_clones": 4.14,
+      "days_included": 7,
+      "days_discarded": 0
+    },
+    "last_30_days": {
+      "total_clones": 197,
+      "unique_clones": 143,
+      "average_daily_clones": 6.57,
+      "average_daily_unique_clones": 4.77,
+      "days_included": 30,
+      "days_discarded": 0
+    },
+    "last_refresh": {
+      "timestamp": "2026-08-29T02:29:25Z",
+      "total_clones": 4437,
+      "unique_clones": 2934
+    }
+  },
   "annotations": [
     {
       "date": "2025-06-08",
       "label": "Daily max: 63"
     }
   ],
-  "total_clones": 4437,
-  "unique_clones": 2934,
+  "discard": [],
   "daily": [
     {
       "timestamp": "2025-06-08T00:00:00Z",
