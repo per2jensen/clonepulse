@@ -3,7 +3,7 @@
 All notable changes to **ClonePulse** will be documented in this file.  
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 1.0.6 - not released
 
 ### Added
 
@@ -13,6 +13,11 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Total and unique clone values now live under `summary` and exclude abnormal days.
+- Python support now starts at 3.11, with CI coverage through Python 3.14.
+- Runtime, test, build, and publishing dependencies refreshed to current supported releases.
+- Development dependency declarations deduplicated and bounded by major version.
+- Dashboard UTC timestamp handling updated for pandas 3 and future pandas 4 compatibility.
+- GitHub workflows now use current checkout and Python setup actions.
 
 ## 1.0.5
 

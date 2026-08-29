@@ -89,6 +89,8 @@ Ensure:
 
 To hack on ClonePulse locally:
 
+ClonePulse requires Python 3.11 or newer and is tested through Python 3.14.
+
 ```bash
 # Ubuntu 24.04 example
 sudo apt update

@@ -1,5 +1,5 @@
 [build-system]
-requires = ['hatchling']
+requires = ["hatchling>=1.32.0,<2"]
 build-backend = "hatchling.build"
 
 
@@ -7,7 +7,7 @@ build-backend = "hatchling.build"
 include = [
   "src/clonepulse/**",
   "README.md",
-  "Changelog.md",
+  "CHANGELOG.md",
   "LICENSE",
   "clonepulse/**",
 ]
@@ -31,39 +31,38 @@ description = """Your GitHub clone stats, visualized and celebrated."""
 readme = "README.md"
 readme-content-type = "text/markdown"
 license = { file="LICENSE", name="MIT" }
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: End Users/Desktop",
-    'Programming Language :: Python :: 3.9',
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "License :: OSI Approved :: MIT License",
     "Operating System :: POSIX :: Linux",
 ]
 
 
 dependencies = [
-    "requests>=2.32.2",
-    "pandas>=2.3.0",
-    "matplotlib>=3.10.3",    
+    "requests>=2.34.2,<3",
+    "pandas>=3.0.5,<4",
+    "matplotlib>=3.11.1,<4",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest",
-  "wheel>=0.45.1",
-  "requests>=2.32.2",
-  "coverage>=7.8.2",
-  "pytest>=8.4.0",
-  "pytest-cov>=6.1.1",
-  "pandas>=2.3.0",
-  "matplotlib>=3.10.3",
+  "pytest>=9.1.1,<10",
+  "wheel>=0.48.0,<1",
+  "coverage>=7.16.0,<8",
+  "pytest-cov>=7.1.0,<8",
 ]
 
 packaging = [
- "build>=1.2.2",
- "hatchling>=1.27.0",
- "hatch>=1.14.1",
- "twine>=6.1.0",
+  "build>=1.6.0,<2",
+  "hatchling>=1.32.0,<2",
+  "hatch>=1.18.0,<2",
+  "twine>=7.0.0,<8",
 ]
 
 [project.urls]

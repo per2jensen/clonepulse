@@ -11,7 +11,7 @@ import pandas as pd
 # --- Helper ---
 def write_test_json(path):
     """Creates valid input JSON with past dates only."""
-    today = pd.Timestamp.utcnow().normalize()
+    today = pd.Timestamp.now(tz="UTC").normalize()
     base = today - pd.Timedelta(days=14)
     daily = [
         {
@@ -38,7 +38,9 @@ def write_test_json(path):
 
 def write_json_with_future_date(path):
     """Writes JSON with a future timestamp that should be rejected."""
-    future_day = (pd.Timestamp.utcnow() + pd.Timedelta(days=3)).isoformat()
+    future_day = (
+        pd.Timestamp.now(tz="UTC") + pd.Timedelta(days=3)
+    ).isoformat()
     daily = [{"timestamp": future_day, "count": 100, "uniques": 50}]
     with open(path, "w") as f:
         json.dump({"daily": daily}, f)
@@ -129,7 +131,7 @@ def test_discarded_dashboard_days_are_imputed_or_skipped(temp_env, capsys):
     """Dashboard uses imputed clone counts and skips entries without replacements."""
     import clonepulse.generate_clone_dashboard as dash
 
-    base = pd.Timestamp.utcnow().normalize() - pd.Timedelta(days=21)
+    base = pd.Timestamp.now(tz="UTC").normalize() - pd.Timedelta(days=21)
     daily = [
         {
             "timestamp": (base + pd.Timedelta(days=index)).isoformat(),

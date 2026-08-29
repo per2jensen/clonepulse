@@ -80,7 +80,9 @@ def render_empty_dashboard(message: str):
         wrap=True, transform=ax.transAxes,
     )
     # Footer on empty dashboard too
-    gen_time = pd.Timestamp.utcnow().tz_convert(None).strftime("%Y-%m-%d %H:%M UTC")
+    gen_time = (
+        pd.Timestamp.now(tz="UTC").tz_convert(None).strftime("%Y-%m-%d %H:%M UTC")
+    )
     fig.text(
         0.99, 0.01,
         f"Generated {gen_time} by https://github.com/per2jensen/clonepulse",
@@ -100,12 +102,12 @@ def _to_naive_utc_date(s: str) -> pd.Timestamp:
 
 
 def _utcnow_naive() -> pd.Timestamp:
-    ts = pd.Timestamp.utcnow()
+    ts = pd.Timestamp.now(tz="UTC")
     return ts.tz_convert(None) if ts.tz is not None else ts
 
 
 def _utc_today_naive() -> pd.Timestamp:
-    ts = pd.Timestamp.utcnow()
+    ts = pd.Timestamp.now(tz="UTC")
     if ts.tz is not None:
         ts = ts.tz_convert(None)
     return ts.normalize()
@@ -468,7 +470,9 @@ def main(argv=None):
     # Reserve bottom margin for footer, then render footer inside the figure box
     plt.tight_layout(rect=[0, 0.02, 1, 1])  # 8% bottom margin
     # --- Footer: provenance note with generation timestamp (UTC) ---
-    gen_time = pd.Timestamp.utcnow().tz_convert(None).strftime("%Y-%m-%d %H:%M UTC")
+    gen_time = (
+        pd.Timestamp.now(tz="UTC").tz_convert(None).strftime("%Y-%m-%d %H:%M UTC")
+    )
     fig.text(
         0.99, 0.01,
         f"Generated {gen_time} by https://github.com/per2jensen/clonepulse",
