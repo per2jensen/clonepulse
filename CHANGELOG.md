@@ -3,7 +3,7 @@
 All notable changes to **ClonePulse** will be documented in this file.  
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 1.0.6 - not released
+## 1.0.6 -  2026-08-30
 
 ### Added
 
