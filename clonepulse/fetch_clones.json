@@ -1,37 +1,47 @@
 {
   "summary": {
-    "total_clones": 4476,
-    "unique_clones": 2951,
-    "total_clones_raw": 4476,
+    "total_clones": 5041,
+    "unique_clones": 2996,
+    "total_clones_raw": 5599,
     "last_7_days": {
-      "total_clones": 63,
-      "unique_clones": 36,
-      "average_daily_clones": 9.0,
-      "average_daily_unique_clones": 5.14,
-      "days_included": 7,
-      "days_discarded": 0
+      "total_clones": 604,
+      "unique_clones": 62,
+      "average_daily_clones": 100.67,
+      "average_daily_unique_clones": 10.33,
+      "days_included": 6,
+      "days_discarded": 1
     },
     "last_30_days": {
-      "total_clones": 212,
-      "unique_clones": 143,
-      "average_daily_clones": 7.07,
-      "average_daily_unique_clones": 4.77,
-      "days_included": 30,
-      "days_discarded": 0
+      "total_clones": 738,
+      "unique_clones": 163,
+      "average_daily_clones": 25.45,
+      "average_daily_unique_clones": 5.62,
+      "days_included": 29,
+      "days_discarded": 1
     },
     "last_refresh": {
-      "timestamp": "2026-08-31T02:36:25.815078Z",
-      "total_clones": 4476,
-      "unique_clones": 2951
+      "timestamp": "2026-09-04T14:56:12.526962Z",
+      "total_clones": 5041,
+      "unique_clones": 2996
     }
   },
   "annotations": [
     {
-      "date": "2025-06-08",
-      "label": "Daily max: 63"
+      "date": "2026-09-01",
+      "label": "Daily max: 490"
     }
   ],
-  "discard": [],
+  "discard": [
+    {
+      "date": "2026-09-03",
+      "count": 558,
+      "uniques": 3,
+      "ratio": 186.0,
+      "imputed_count": 87,
+      "imputed_from_days": 7,
+      "discard_reason": "Clone/unique ratio 186.0x exceeds threshold 25x"
+    }
+  ],
   "daily": [
     {
       "timestamp": "2025-06-08T00:00:00Z",
@@ -2272,6 +2282,33 @@
       "timestamp": "2026-08-29T00:00:00Z",
       "count": 34,
       "uniques": 12
+    },
+    {
+      "timestamp": "2026-08-30T00:00:00Z",
+      "count": 52,
+      "uniques": 14
+    },
+    {
+      "timestamp": "2026-08-31T00:00:00Z",
+      "count": 20,
+      "uniques": 6
+    },
+    {
+      "timestamp": "2026-09-01T00:00:00Z",
+      "count": 490,
+      "uniques": 22
+    },
+    {
+      "timestamp": "2026-09-02T00:00:00Z",
+      "count": 3,
+      "uniques": 3
+    },
+    {
+      "timestamp": "2026-09-03T00:00:00Z",
+      "count": 558,
+      "uniques": 3,
+      "discarded": true,
+      "imputed_count": 87
     }
   ]
 }
