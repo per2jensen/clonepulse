@@ -1,28 +1,28 @@
 {
   "summary": {
-    "total_clones": 5773,
-    "unique_clones": 3347,
-    "total_clones_raw": 6331,
+    "total_clones": 5782,
+    "unique_clones": 3351,
+    "total_clones_raw": 6340,
     "last_7_days": {
-      "total_clones": 154,
-      "unique_clones": 68,
-      "average_daily_clones": 22.0,
-      "average_daily_unique_clones": 9.71,
+      "total_clones": 133,
+      "unique_clones": 56,
+      "average_daily_clones": 19.0,
+      "average_daily_unique_clones": 8.0,
       "days_included": 7,
       "days_discarded": 0
     },
     "last_30_days": {
-      "total_clones": 591,
-      "unique_clones": 287,
-      "average_daily_clones": 19.7,
-      "average_daily_unique_clones": 9.57,
+      "total_clones": 581,
+      "unique_clones": 283,
+      "average_daily_clones": 19.37,
+      "average_daily_unique_clones": 9.43,
       "days_included": 30,
       "days_discarded": 0
     },
     "last_refresh": {
-      "timestamp": "2026-10-14T02:34:54.706521Z",
-      "total_clones": 5773,
-      "unique_clones": 3347
+      "timestamp": "2026-10-15T02:35:23.435011Z",
+      "total_clones": 5782,
+      "unique_clones": 3351
     }
   },
   "annotations": [
@@ -2504,6 +2504,11 @@
       "timestamp": "2026-10-12T00:00:00Z",
       "count": 22,
       "uniques": 8
+    },
+    {
+      "timestamp": "2026-10-13T00:00:00Z",
+      "count": 9,
+      "uniques": 4
     }
   ]
 }
